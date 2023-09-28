@@ -165,6 +165,7 @@ int main(int argc, char* argv[]) {
                     printf("Number must be positive\n");
                     break;
             }
+            free(multipliers_result);
             
             }    
         else if ((argv[2][0] == '-' || argv[2][0] == '/') && argv[2][1] == 'p') {
@@ -194,6 +195,7 @@ int main(int argc, char* argv[]) {
                     printf("Invalid parameter\n");
                     break;
             }
+            free(splitter_result);
         }
         else if ((argv[2][0] == '-' || argv[2][0] == '/') && argv[2][1] == 'e')  {
             int ** power_table_result = (int**)malloc(sizeof(int*) * 10);
@@ -217,6 +219,7 @@ int main(int argc, char* argv[]) {
                     printf("Overflow\n");
                     break;
             }
+            free(power_table_result);
         }
         else if ((argv[2][0] == '-' || argv[2][0] == '/') && argv[2][1] == 'a') {
             long long int sum_result = 0;
