@@ -95,6 +95,7 @@ enum file_splitter_status_codes file_splitter (FILE * in, FILE * out) {
             }
         }
     }
+    free(undefined_number);
     return fssc_ok;
 }
 
