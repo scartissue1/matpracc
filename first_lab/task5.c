@@ -2,6 +2,18 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <ctype.h>
+
+bool eps_validation (char * eps) {
+    int eps_length = strlen(eps);
+    bool fl = false;
+    for (int i = 0; i < eps_length; i++) {
+        if (isdigit(eps[i]) || eps[i] == 'e' || eps[i] == '.'|| eps[i] == '-') fl = true;
+        else { fl = false; break; }
+    }
+    return fl;
+}
 
 int factorial (int number) {
     if (number == 0 || number == 1) return 1;
@@ -65,14 +77,20 @@ double fourth_row (double value, double eps) {
 
 int main (int argc, char * argv[]) {
     if (argc == 3) {
-        char * ptr;
-        double value = strtod(argv[1], &ptr);
-        double eps = strtod(argv[2], &ptr);
+        double value = atof(argv[1]);
+        double eps = atof(argv[2]);
 
-        printf("a. %lf\n", first_row(value, eps));
-        printf("b. %lf\n", second_row(value, eps));
-        printf("c. %lf\n", third_row(value, eps));
-        printf("d. %lf\n", fourth_row(value, eps));
+        switch (eps_validation(argv[2])) {
+            case true:
+                printf("a. %lf\n", first_row(value, eps));
+                printf("b. %lf\n", second_row(value, eps));
+                printf("c. %lf\n", third_row(value, eps));
+                printf("d. %lf\n", fourth_row(value, eps));
+                break;
+            case false:
+                break;
+        }
+        
         
     }
     else printf("Wrong flag!\n");
