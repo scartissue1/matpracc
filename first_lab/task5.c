@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-bool eps_validation (char * eps) {
+bool eps_validation (char /*const*/ * eps) {
     int eps_length = strlen(eps);
     bool fl = false;
     for (int i = 0; i < eps_length; i++) {
@@ -52,14 +52,15 @@ double second_row (double value, double eps) {
 }
 
 double third_row (double value, double eps) {
-    double n_arg = 0.0;
-    double prev = 0.0;
-    double summ = (pow(3.0, 3.0 * n_arg) * pow((double)factorial(n_arg), 3.0) * (pow(value, 2.0 * n_arg))) / ((double)factorial(3.0 * n_arg));
-    while (fabs(summ - prev) > eps) {
+    double n_arg = 1;
+    double prev;
+    double summ = 1, elem = 1;
+    do {
+        prev = elem;
+        elem *= (9 * n_arg * n_arg * value * value) / (9 * n_arg * n_arg - 9 * n_arg + 2);
         n_arg++;
-        prev = summ;
-        summ += (pow(3.0, 3.0 * n_arg) * pow((double)factorial(n_arg), 3.0) * (pow(value, 2.0 * n_arg))) / ((double)factorial(3.0 * n_arg));
-    }
+        summ += elem;
+    } while (fabs(elem - prev) > eps);
     return summ;
 }
 
