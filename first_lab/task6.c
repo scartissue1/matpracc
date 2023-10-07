@@ -2,6 +2,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <ctype.h>
+#include <string.h>
 
 bool eps_validation (char * eps) {
     int eps_length = strlen(eps);
@@ -21,16 +23,16 @@ int factorial (int number) {
 
 double first_integral (double eps) {
     int n_arg = 2;
-    double prev = 0;
+    double prev;
     double curr = 1;
-    int sign = -1;
+    double sign = -1;
 
-    while (fabs(curr - prev) > eps) {
-        n_arg++;
+    do {
         prev = curr;
         curr += sign * (1.0 / (double)(n_arg * n_arg));
         sign = -sign;
-    }
+        n_arg++;
+    } while (fabs(curr - prev) > eps);
     return curr;
 }
 
