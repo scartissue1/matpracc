@@ -41,7 +41,7 @@ void min_max_swapper (int array[SIZE], int left, int right) {
     array[max_index] = min_value;
 }
 
-int binary_nearest_search (int to_find, int array_size, int array[array_size]) {
+int binary_nearest_search (int to_find, int array_size, int * array) {
     int left = 0, right = array_size, gap = 1001;
     while (left < right) {
         int m = (left + right) / 2;
@@ -86,7 +86,7 @@ int binary_nearest_search (int to_find, int array_size, int array[array_size]) {
 }
 
 void array_of_nearest (int array_A_size, int array_B_size,
-    int array_A[array_A_size], int array_B[array_B_size], int array_C[array_A_size]) {
+    int * array_A, int * array_B, int * array_C) {
     qsort(array_B, array_B_size, sizeof(int), (int(*)(const void *, const void *))comp);
     for (int i = 0; i < array_A_size; i++) {
         array_C[i] = array_A[i] + binary_nearest_search(array_A[i], array_B_size, array_B);
@@ -119,15 +119,30 @@ int main(int argc, char * argv[]) {
 
         int array_A_size = rand() % (10000 - 10) + 10;
         int array_B_size = rand() % (10000 - 10) + 10;
-        int array_A[array_A_size];
+        int * array_A = (int *)malloc(sizeof(int) * array_A_size);
+        if (!array_A) {
+            printf("No memory\n");
+            return -1;
+        }
+        int * array_B = (int *)malloc(sizeof(int) * array_B_size);
+        if (!array_B) {
+            free(array_A);
+            printf("No memory\n");
+            return -1;
+        }
         for (int i = 0; i < array_A_size; i++) {
             array_A[i] = rand() % 2000 - 1000; 
         }
-        int array_B[array_B_size];
         for (int i = 0; i < array_B_size; i++) {
             array_B[i] = rand() % 2000 - 1000; 
         }
-        int array_C[array_A_size];
+        int * array_C = (int *)malloc(sizeof(int) * array_A_size);
+        if (!array_C) {
+            free(array_A);
+            free(array_B);
+            printf("No memory\n");
+            return -1;
+        }
         
         array_of_nearest(array_A_size, array_B_size, array_A, array_B, array_C);
         
@@ -146,6 +161,9 @@ int main(int argc, char * argv[]) {
             printf("%d ", array_C[i]);
         }
         printf("\n");
+        free(array_A);
+        free(array_B);
+        free(array_C);
 
     }
     else {
