@@ -41,8 +41,7 @@ long long int from_base_to_int (char * number, int number_size, int base) {
     }
     else if (number[0] == '+') sign_flag = 1;
     for (int i = number_size - 2; i >= sign_flag; i--) {
-        int num = isdigit(number[i]) ? number[i] - '0' : number[i] - 'A' + 10;
-        decimal += power * num;
+        decimal += power * ((isdigit(number[i])) ? number[i] - '0' : number[i] - 'A' + 10);
         power *= base;
     }
     return decimal * sign;
