@@ -75,6 +75,7 @@ char * in_base_summ(const int base, int quantity, ...) {
         char * new_string = va_arg(number, char *);
         if (!in_base_validation(new_string, base)) {
             printf("Wrong number\n");
+            free(summ_string);
             return NULL;
         }
         tmp = summ_string;
