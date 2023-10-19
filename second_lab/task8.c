@@ -47,8 +47,8 @@ char * summ(char * string1, char * string2, size_t string1_size, size_t string2_
     while (index1 >= 0 || index2 >= 0) {
         if (index1 < 0) _1flag = 0;
         if (index2 < 0) _2flag = 0;
-        int curr = ((_1flag) ? isdigit(string1[index1]) ? string1[index1] - '0' : _islower(string1[index1]) ? string1[index1] - 'A' + -22 : string1[index1] - 'A' + 10 : 0) +
-            ((_2flag) ? isdigit(string2[index2]) ? string2[index2] - '0' : _islower(string2[index2]) ? string2[index2] - 'A' + -22 : string2[index2] - 'A' + 10 : 0) + 
+        int curr = ((_1flag) ? isdigit(string1[index1]) ? string1[index1] - '0' : _islower(string1[index1]) ? string1[index1] - 'A' - 22 : string1[index1] - 'A' + 10 : 0) +
+            ((_2flag) ? isdigit(string2[index2]) ? string2[index2] - '0' : _islower(string2[index2]) ? string2[index2] - 'A' - 22 : string2[index2] - 'A' + 10 : 0) + 
             tmp;
         tmp = 0;
         while (curr >= base) {
