@@ -21,17 +21,8 @@ int double_length(double number, const double EPS) {
     
 }
 
-int is_power(int number, int base) {
-    if (number < base) {
-        int tmp = base;
-        base = number;
-        number = tmp;
-    }
-    while (number > 1) {
-        if (number % base != 0) return 0;
-        number /= base;
-    }
-    return 1;
+int is_dividing(int number, int base) {
+    return (number % base == 0 || base % number == 0);
 }
 
 int greatest_common_divisor(int first, int second) {
@@ -62,7 +53,7 @@ double * final_representation_in_base (const double EPS, size_t * result_size, c
         double dnumber = va_arg(fractions, double);
         if (dnumber > 1 - EPS || dnumber < EPS) return NULL;
         common_fraction(dnumber, &numerator, &denominator, EPS);
-        if (!is_power(denominator, base)) continue;
+        if (!is_dividing(denominator, base)) continue;
         (*result_size)++;
         result[(*result_size) - 1] = dnumber;
     }
