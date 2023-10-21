@@ -76,7 +76,7 @@ int _islower(char * number, size_t number_size) {
     return 1;
 }
 
-long long int from_base_to_int (char * number, int number_size, int base, int upper_flag) {
+long long int from_base_to_int(char * number, int number_size, int base, int upper_flag) {
     if (!number) return 0;
     if ((base < 2) || (base > 36)) base = 10;
     
@@ -94,7 +94,7 @@ long long int from_base_to_int (char * number, int number_size, int base, int up
     return decimal * sign;
 }
 
-char * from_decimal_to_base (long long int number, int base, int upper_flag) {
+char * from_decimal_to_base(long long int number, int base, int upper_flag) {
     if ((base < 2) || (base > 36)) base = 10;
     
     int num_in_base_length = 0, sign_flag = 0;
@@ -148,7 +148,8 @@ int overfprintf(FILE * stream, char * format, ...) {
         flag[0] = '%';
         if (tmp_flag) free(tmp_flag);
         while ((isalpha(format[++format_index]) || isdigit(format[format_index]) || (format[format_index] == '%' && format[format_index - 1] == '%') ||
-        (format[format_index] == '.' && (isalpha(format[format_index + 1]) || isdigit(format[format_index + 1]) || format[format_index + 1] == '%'))) && (format_index < format_size)) {
+        (format[format_index] == '.' && (isalpha(format[format_index + 1]) || isdigit(format[format_index + 1]) || format[format_index + 1] == '*'))
+        || (format[format_index] == '#') || (format[format_index] == '+') || (format[format_index] == '-') || (format[format_index] == '0')) && (format_index < format_size)) {
             flag[flag_size] = format[format_index];
             flag_size++;
             if (flag_size >= flag_capacity) {
@@ -293,7 +294,8 @@ int oversprintf(char * buf, char * format, ...) {
         flag[0] = '%';
         if (tmp_flag) free(tmp_flag);
         while ((isalpha(format[++format_index]) || isdigit(format[format_index]) || (format[format_index] == '%' && format[format_index - 1] == '%') ||
-        (format[format_index] == '.' && (isalpha(format[format_index + 1]) || isdigit(format[format_index + 1]) || format[format_index + 1] == '%'))) && (format_index < format_size)) {
+        (format[format_index] == '.' && (isalpha(format[format_index + 1]) || isdigit(format[format_index + 1]) || format[format_index + 1] == '*'))
+        || (format[format_index] == '#') || (format[format_index] == '+') || (format[format_index] == '-') || (format[format_index] == '0')) && (format_index < format_size)) {
             flag[flag_size] = format[format_index];
             flag_size++;
             if (flag_size >= flag_capacity) {
@@ -421,7 +423,7 @@ int main(int argc, char * argv[]) {
 
     // fprintf(out, "%d %\n", x);
     // fclose(out);
-    overfprintf(stdout, "%c %.2f %Cv.. %d %lf %lf %u %mi %mu %md %mf.", 65, 0.0001, 5, 2, 5, 123.123, 2.5, 234, 10, 123123, 232.423, 1231.123);
+    overfprintf(stdout, "%mi %mi %mi %mi\n", 65, 65, 5, 2);
     //char * buf = (char *)malloc(sizeof(char) * BUFSIZ);
     //oversprintf(buf, "%Ro\n\n\n%d\n\n", 10, 123123, 232.423, 1231.123);
     //printf("%s\n", buf);
