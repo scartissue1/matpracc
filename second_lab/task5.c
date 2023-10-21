@@ -147,7 +147,8 @@ int overfprintf(FILE * stream, char * format, ...) {
         flag = (char *)malloc(sizeof(char) * flag_capacity);
         flag[0] = '%';
         if (tmp_flag) free(tmp_flag);
-        while ((isalpha(format[++format_index]) || isdigit(format[format_index])) && (format_index < format_size)) {
+        while ((isalpha(format[++format_index]) || isdigit(format[format_index]) || (format[format_index] == '%' && format[format_index - 1] == '%') ||
+        (format[format_index] == '.' && (isalpha(format[format_index - 1]) || isdigit(format[format_index - 1]) || format[format_index - 1] == '%'))) && (format_index < format_size)) {
             flag[flag_size] = format[format_index];
             flag_size++;
             if (flag_size >= flag_capacity) {
@@ -291,7 +292,8 @@ int oversprintf(char * buf, char * format, ...) {
         flag = (char *)malloc(sizeof(char) * flag_capacity);
         flag[0] = '%';
         if (tmp_flag) free(tmp_flag);
-        while ((isalpha(format[format_index]) || isdigit(format[format_index])) && (format_index < format_size)) {
+        while ((isalpha(format[++format_index]) || isdigit(format[format_index]) || (format[format_index] == '%' && format[format_index - 1] == '%') ||
+        (format[format_index] == '.' && (isalpha(format[format_index - 1]) || isdigit(format[format_index - 1]) || format[format_index - 1] == '%'))) && (format_index < format_size)) {
             flag[flag_size] = format[format_index];
             flag_size++;
             if (flag_size >= flag_capacity) {
@@ -419,7 +421,7 @@ int main(int argc, char * argv[]) {
 
     // fprintf(out, "%d %\n", x);
     // fclose(out);
-    overfprintf(stdout, "%c sdfsdfs%Ro sdfsf %Cv %d %lf %lf %u %mi %mu %md %mf\n", 65, 1005, 5, 2, 5, 123.123, 2.5, 234, 10, 123123, 232.423, 1231.123);
+    overfprintf(stdout, "%c %.2f %Cv %d %lf %lf %u %mi %mu %md %mf\n", 65, 0.0001, 5, 2, 5, 123.123, 2.5, 234, 10, 123123, 232.423, 1231.123);
     //char * buf = (char *)malloc(sizeof(char) * BUFSIZ);
     //oversprintf(buf, "%Ro\n\n\n%d\n\n", 10, 123123, 232.423, 1231.123);
     //printf("%s\n", buf);
