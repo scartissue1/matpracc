@@ -21,9 +21,19 @@ int double_length(double number, const double EPS) {
     
 }
 
-int is_dividing(int number, int base) {
-    return (number % base == 0 || base % number == 0);
+int is_power(int number, int base) {
+    if (number < base) {
+        int tmp = base;
+        base = number;
+        number = tmp;
+    }
+    while (number > 1) {
+        if (number % base != 0) return 0;
+        number /= base;
+    }
+    return 1;
 }
+
 
 int greatest_common_divisor(int first, int second) {
     return second ? greatest_common_divisor(second, first % second) : first;
@@ -47,13 +57,14 @@ double * final_representation_in_base (const double EPS, size_t * result_size, c
     va_start(fractions, quantity);
     *result_size = 0;
     double * result = (double *)malloc(sizeof(double) * quantity);
+    if (!result) return NULL;
     for (int i = 0; i < quantity; i++) {
         int numerator = 0;
         int denominator = 1;
         double dnumber = va_arg(fractions, double);
         if (dnumber > 1 - EPS || dnumber < EPS) return NULL;
         common_fraction(dnumber, &numerator, &denominator, EPS);
-        if (!is_dividing(denominator, base)) continue;
+        if (!is_power(denominator, base)) continue;
         (*result_size)++;
         result[(*result_size) - 1] = dnumber;
     }
@@ -64,7 +75,7 @@ double * final_representation_in_base (const double EPS, size_t * result_size, c
 int main(int argc, char * argv[]) {
     size_t final_rep_size = 0;
     const double EPS = 1e-10;
-    double * final_rep = final_representation_in_base(EPS, &final_rep_size, 8, 5, 0.00001, 0.0002, 0.125, 0.25, 0.5);
+    double * final_rep = final_representation_in_base(EPS, &final_rep_size, 5, 6, 0.001, 0.2, 0.125, 0.25, 0.5, 0.0625);
     if (final_rep) {
         if (final_rep_size) {
             for (size_t i = 0; i < final_rep_size; i++) {
@@ -74,6 +85,7 @@ int main(int argc, char * argv[]) {
         else printf("No such number\n");
         free(final_rep);
     }
+    else printf("No memory\n");
     
     return 0;
 }
