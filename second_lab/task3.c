@@ -23,6 +23,8 @@ typedef struct {
     char * filename;
 } founds;
 
+status_codes zero_size_exeption(founds ** result, int * result_size, int * result_capacity, const char * filename, FILE * file);
+
 status_codes find_overlap(founds ** result, int * result_size, int * result_capacity, const char * substring, size_t substring_size, const char * filename, FILE * file);
 
 status_codes get_file(founds ** result, int * result_size, const char * substring, int quantity, ...);
@@ -46,7 +48,13 @@ int main(int argc, char * argv[]) {
             printf("No memory\n");
             return -1;
         case ZERO_SIZE:
-            printf("Zero sized string\n");
+            printf("Zero sized string contains after: \n");
+            for (int i = 0; i < result_capacity; i++) {
+                if (result[i].row != 0) {
+                    printf("row: %d, index: %d, file: %s\n", result[i].row, result[i].symbol, result[i].filename);
+                }
+                free(result[i].filename);
+            }
             break;
         case INVALID_PARAMETER:
             printf("Invalid parameter\n");
@@ -57,15 +65,16 @@ int main(int argc, char * argv[]) {
 
 status_codes get_file(founds ** result, int * result_capacity, const char * substring, int quantity, ...) {
     if (quantity < 1 || !substring) return INVALID_PARAMETER;
-    size_t substring_size = _strlen(substring);
-    if (!substring_size) return ZERO_SIZE;
     (*result_capacity) = 32;
     (*result) = (founds *)malloc(sizeof(founds) * (*result_capacity));
     if (!(*result)) return NO_MEMORY;
-    int result_index = 0;
+    int result_size = 0;
+
+    size_t substring_size = _strlen(substring);
 
     va_list files;
     va_start(files, quantity);
+    int zero_size_flag = 0;
 
     for (int i = 0; i < quantity; i++) {
         const char * filename = va_arg(files, const char *);
@@ -74,7 +83,16 @@ status_codes get_file(founds ** result, int * result_capacity, const char * subs
             va_end(files);
             return NO_FILE;
         }
-        switch (find_overlap(result, &result_index, result_capacity, substring, substring_size, filename, file)) {
+        if (!substring_size) {
+            switch (zero_size_exeption(result, &result_size, result_capacity, filename, file)) {
+                case OK:
+                    zero_size_flag = 1;
+                    break;
+                case NO_MEMORY:
+                    return NO_MEMORY;
+            }
+        }
+        switch (find_overlap(result, &result_size, result_capacity, substring, substring_size, filename, file)) {
             case OK:
                 break;
             case NO_MEMORY:
@@ -86,10 +104,12 @@ status_codes get_file(founds ** result, int * result_capacity, const char * subs
         
     }
     va_end(files);
+    if (zero_size_flag) return ZERO_SIZE;
     return OK;
 }
 
 status_codes find_overlap(founds ** result, int * result_size, int * result_capacity, const char * substring, size_t substring_size, const char * filename, FILE * file) {
+    size_t filename_size = _strlen(filename);
     int substring_index = 0;
     char symbol = fgetc(file);
     int coincedence = 0;
@@ -108,11 +128,12 @@ status_codes find_overlap(founds ** result, int * result_size, int * result_capa
             }
             substring_index++;
             if (substring_index == substring_size) {
-                founds t;
-                t.row = row_coincedence_index;
-                t.symbol = symbol_coincedence_index;
-                t.filename = strdup(filename);
-                (*result)[(*result_size)] = t;
+                founds new;
+                new.row = row_coincedence_index;
+                new.symbol = symbol_coincedence_index;
+                new.filename = (char *)malloc(sizeof(char) * filename_size);
+                memcpy(new.filename, filename, filename_size);
+                (*result)[(*result_size)] = new;
                 (*result_size)++;
                 if (*result_size >= *result_capacity) {
                     *result_capacity *= 2;
@@ -143,5 +164,41 @@ status_codes find_overlap(founds ** result, int * result_size, int * result_capa
             curr_symbol = 0;
         }
     } 
+    return OK;
+}
+
+status_codes zero_size_exeption(founds ** result, int * result_size, int * result_capacity, const char * filename, FILE * file) {
+    char symbol = fgetc(file);
+    int curr_row = 1;
+    int curr_symbol = 0;
+    size_t filename_size = _strlen(filename);
+
+    while (symbol != EOF) {
+        if ((symbol = fgetc(file)) != EOF) {
+            founds new;
+            new.row = curr_row;
+            new.symbol = curr_symbol;
+            new.filename = (char *)malloc(sizeof(char) * filename_size);
+            if (!new.filename) return NO_MEMORY;
+            memcpy(new.filename, filename, filename_size);
+            (*result)[(*result_size)] = new;
+            (*result_size)++;
+            if (*result_size >= *result_capacity) {
+                *result_capacity *= 2;
+                founds * tmp = (founds *)realloc((*result), (*result_capacity));
+                if (!tmp) {
+                    free(*result);
+                    return NO_MEMORY;
+                }        
+            }
+            fseek(file, -1, SEEK_CUR);
+        }
+        symbol = fgetc(file);
+        curr_symbol++;
+        if (symbol == '\n') {
+            curr_row++;
+            curr_symbol = 0;
+        }
+    }
     return OK;
 }
