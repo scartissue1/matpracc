@@ -27,8 +27,7 @@ int main(int argc, char * argv[]) {
     int zeckendorf;
     int from_base;
     //overfscanf(stdin, "%d %d %d", &roman, &zeckendorf, &from_base);
-
-    char buf[BUFSIZ] = "11 a";
+    char buf[] = "101011011 a";
     oversscanf(buf, "%Zr%Cv", &zeckendorf, &from_base, 16);
     printf("%d %d\n", zeckendorf, from_base);
     return 0;
@@ -59,7 +58,7 @@ int overfscanf(FILE * stream, const char * format, ...) {
         flag[0] = '%';
         if (tmp_flag) free(tmp_flag);
 
-        while ((isdigit(format[format_index])) || (isalpha(format[format_index])) && (format_index < format_size)) {
+        while ((isdigit(format[format_index])) || (isalpha(format[format_index]) || (format[format_index] == '%' && format[format_index - 1] == '%') || format[format_index] == '[' || format[format_index] == ']') && (format_index < format_size)) {
             flag[flag_size] = format[format_index];
             flag_size++;
             if (flag_size >= flag_capacity) {
@@ -67,7 +66,7 @@ int overfscanf(FILE * stream, const char * format, ...) {
                 char * tmp = (char *)realloc(flag, sizeof(char) * flag_capacity);
                 if (!tmp) {
                     free(flag);
-                    printf("No memory\n");
+                    //printf("No memory\n");
                     return -1;
                 }
                 flag = tmp;
@@ -102,7 +101,7 @@ int overfscanf(FILE * stream, const char * format, ...) {
             }
             else {
                 if (in_register(in_base, in_base_size, 'a', 'z')) {
-                    (*input) = from_base_to_int(in_base, in_base_size, base, 2);
+                    (*input) = from_base_to_int(in_base, in_base_size, base, 0);
                 }
                 else (*input) = 0; 
             }
@@ -146,7 +145,7 @@ int oversscanf(char * buf, const char * format, ...) {
         flag[0] = '%';
         if (tmp_flag) free(tmp_flag);
 
-        while ((isdigit(format[format_index])) || (isalpha(format[format_index])) && (format_index < format_size)) {
+        while ((isdigit(format[format_index])) || (isalpha(format[format_index]) || (format[format_index] == '%' && format[format_index - 1] == '%') || format[format_index] == '[' || format[format_index] == ']') && (format_index < format_size)) {
             flag[flag_size] = format[format_index];
             flag_size++;
             if (flag_size >= flag_capacity) {
@@ -154,7 +153,7 @@ int oversscanf(char * buf, const char * format, ...) {
                 char * tmp = (char *)realloc(flag, sizeof(char) * flag_capacity);
                 if (!tmp) {
                     free(flag);
-                    printf("No memory\n");
+                    //printf("No memory\n");
                     return -1;
                 }
                 flag = tmp;
@@ -166,14 +165,14 @@ int oversscanf(char * buf, const char * format, ...) {
             int * input = va_arg(args, int *);
             char roman[BUFSIZ];
             accum += sscanf(buf + buf_index, "%s", roman);
-            buf_index += _strlen(roman) + 1;
+            buf_index += _strlen(roman);
             (*input) = from_roman(roman);
         }
         else if (strcmp(flag, "%Zr") == 0) {
             unsigned int * input = va_arg(args, unsigned int *);
             char zeckendorf[BUFSIZ];
             accum += sscanf(buf + buf_index, "%s", zeckendorf);
-            buf_index += _strlen(zeckendorf) + 1;
+            buf_index += _strlen(zeckendorf);
             (*input) = from_zeckendorf(zeckendorf);
         }
         else if (strcmp(flag, "%Cv") == 0 || strcmp(flag, "%CV") == 0) {
@@ -181,9 +180,9 @@ int oversscanf(char * buf, const char * format, ...) {
             int base = va_arg(args, int);
             arg_quantity++;
             char in_base[BUFSIZ];
-            size_t in_base_size = _strlen(in_base);
             accum += sscanf(buf + buf_index, "%s", in_base);
-            buf_index += in_base_size + 1;
+            size_t in_base_size = _strlen(in_base);
+            buf_index += in_base_size;
             if (flag[2] == 'V') {
                 if (in_register(in_base, in_base_size, 'A', 'Z')) {
                     (*input) = from_base_to_int(in_base, in_base_size, base, 1);
@@ -192,7 +191,7 @@ int oversscanf(char * buf, const char * format, ...) {
             }
             else {
                 if (in_register(in_base, in_base_size, 'a', 'z')) {
-                    (*input) = from_base_to_int(in_base, in_base_size, base, 2);
+                    (*input) = from_base_to_int(in_base, in_base_size, base, 0);
                 }
                 else (*input) = 0; 
             }
@@ -201,7 +200,17 @@ int oversscanf(char * buf, const char * format, ...) {
         else  {
             void * new_arg = va_arg(args, void *);
             accum += sscanf(buf + buf_index, flag, new_arg);
-            buf_index += _strlen(new_arg) + 1;
+            // buf_index += _strlen(new_arg) * sizeof(void *) + 1;
+            // printf("%d\n", buf_index);
+            // accum += vsscanf(buf + buf_index, flag, args);
+            int splitter = 0;
+            while (buf[buf_index] != 0) {
+                if ((isalpha(buf[buf_index]) || isdigit(buf[buf_index])) && (splitter)) {
+                    break;
+                }
+                if (buf[buf_index] == ' ' || buf[buf_index] == '\n') splitter++;
+                buf_index++;
+            }
         }
         tmp_flag = flag;
         while (format[format_index++] != '%' && (format_index < format_size));
