@@ -76,7 +76,7 @@ int main(int argc, char * argv[]) {
             fclose(out);
             return -1;
     }
-    qsort(database, size, sizeof(Employee), (int(*)(const void *, const void *))comp);
+    qsort(database, size, sizeof(database[0]), (int(*)(const void *, const void *))comp);
     for (int i = 0; i < size; i++) {
         printf("%u %s %u\n", database[i].id, database[i].surname, database[i].salary);
     }
