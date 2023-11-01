@@ -5,7 +5,7 @@
 #include <ctype.h>
 
 typedef struct {
-    unsigned int id;
+    int id;
     char name[BUFSIZ];
     char surname[BUFSIZ];
     double salary;
@@ -113,11 +113,13 @@ int main(int argc, char * argv[]) {
             break;
         case NO_MEMORY:
             printf("No memory\n");
+            fclose(in);
             fclose(out);
             return -1;
         case INVALID_PARAMETER:
             printf("Invalid parameter detected\n");
             free(database);
+            fclose(in);
             fclose(out);
             return -1;
     }
@@ -139,7 +141,7 @@ status_codes get_database(FILE * file, Employee ** database, size_t * size, size
     char new_surname[BUFSIZ];
     char new_name[BUFSIZ];
     while (fscanf(file, "%s %s %s %s", new_id_string, new_name, new_surname, new_salary_string) != EOF) {
-        if (!strlen(new_surname)) return INVALID_PARAMETER;
+        if (!strlen(new_surname) || !strlen(new_id_string) || !strlen(new_salary_string) || !strlen(new_name)) return INVALID_PARAMETER;
         Employee new;
         int new_id = atoi(new_id_string);
         if (new_id < 0 || !int_validation(new_id_string)) return INVALID_PARAMETER;
@@ -157,7 +159,6 @@ status_codes get_database(FILE * file, Employee ** database, size_t * size, size
             (*capacity) *= 2;
             Employee * tmp = (Employee *)realloc((*database), sizeof(Employee) * (*capacity));
             if (tmp == NULL) {
-                fclose(file);
                 free(*database);
                 return NO_MEMORY;
             }
@@ -170,10 +171,10 @@ status_codes get_database(FILE * file, Employee ** database, size_t * size, size
 void put_database(FILE * file, Employee * database, const size_t size, const int sort_flag) {
     if (!sort_flag) {
         for (int i = 0; i < size; i++)
-            fprintf(file, "%u %s %s %lf\n", database[i].id, database[i].name, database[i].surname, database[i].salary);
+            fprintf(file, "%d %s %s %lf\n", database[i].id, database[i].name, database[i].surname, database[i].salary);
     }
     else {
         for (int i = size - 1; i >= 0; i--)
-            fprintf(file, "%u %s %s %lf\n", database[i].id, database[i].name, database[i].surname, database[i].salary);
+            fprintf(file, "%d %s %s %lf\n", database[i].id, database[i].name, database[i].surname, database[i].salary);
     }
 }
