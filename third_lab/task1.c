@@ -10,11 +10,13 @@ typedef enum {
 
 int get_power(int base);
 
+int decrement(int number);
+
 status_codes int_to_base(long long int number, int base, char ** in_base);
 
 int main(int argc, char * argv[]) {
     char * in_base = NULL;
-    switch (int_to_base(1631, 9, &in_base)) {
+    switch (int_to_base(1631, 16, &in_base)) {
         case OK:
             printf("%s\n", in_base);
             break;
@@ -48,9 +50,10 @@ status_codes int_to_base(long long int number, int base, char ** in_base) {
     if (!(*in_base)) return NO_MEMORY;
     int index = in_base_size - 2;
     while (number) {
-        (*in_base)[index] = ((number & (base - 1)) < 10) ? (number & (base - 1)) + '0' : (number & (base - 1)) + 'A' - 10;
+        (*in_base)[index] = ((number & (decrement(base))) < 10) ? (number & (decrement(base))) + '0' : (number & (decrement(base))) + 'A' - 10;
         number >>= power;
-        index--;
+        if (index) index = decrement(index);
+        
     }
     if (sign_flag) (*in_base)[0] = '-';
     (*in_base)[in_base_size - 1] = '\0';
@@ -65,4 +68,14 @@ int get_power(int base) {
         power++;
     }
     return power;
+}
+
+int decrement(int number) {
+    int tmp = 1;
+    while (!(tmp & number)) {
+        number ^= tmp;
+        tmp <<= 1;
+    }
+    number ^= tmp;
+    return number;
 }
