@@ -53,7 +53,7 @@ status_codes got_the_norm(Vector *** result, Vector new_vector, double new_vecto
 }
 
 status_codes max_norms(Vector *** result, size_t * limit_norm_result_size, size_t * gelder_norm_result_size, size_t * scalar_norm_result_size, size_t dimension, 
-                    double (*limit_norm)(Vector vec), double (*gelder_norm)(Vector vec, int p_arg), double (*scalar_norm)(Vector vec), int quantity, ...) {
+                    double (*limit_norm)(Vector vec), double (*gelder_norm)(Vector vec, int p_arg), int p_arg_for_gelder, double (*scalar_norm)(Vector vec), int quantity, ...) {
     (*result) = (Vector **)malloc(sizeof(Vector *) * 3);
     if (!(*result)) return NO_MEMORY;
     
@@ -92,7 +92,7 @@ status_codes max_norms(Vector *** result, size_t * limit_norm_result_size, size_
             va_end(vectors);
             return NO_MEMORY;
         }
-        double new_vector_gelder_norm = gelder_norm(new_vector, 3);
+        double new_vector_gelder_norm = gelder_norm(new_vector, p_arg_for_gelder);
         if (got_the_norm(result, new_vector, new_vector_gelder_norm, &gelder_norm_max, gelder_norm_result_size, &gelder_norm_result_capacity, 1) == NO_MEMORY) {
             va_end(vectors);
             return NO_MEMORY;
@@ -116,7 +116,7 @@ int main(int argc, char * argv[]) {
     Vector ** norm_maximums = NULL;
     size_t limit_norm_size = 0, gelder_norm_size = 0, scalar_norm_size = 0;
 
-    switch (max_norms(&norm_maximums, &limit_norm_size, &gelder_norm_size, &scalar_norm_size, 3, limit_norm, gelder_norm, scalar_norm, 3, first, second, third)) {
+    switch (max_norms(&norm_maximums, &limit_norm_size, &gelder_norm_size, &scalar_norm_size, 3, limit_norm, gelder_norm, 3, scalar_norm, 3, first, second, third)) {
         case OK:
             printf("limit norm maximum(s)\n");
             for (int i = 0; i < limit_norm_size; i++) print_vector(norm_maximums[0][i]);
