@@ -54,6 +54,8 @@ status_codes got_the_norm(Vector *** result, Vector new_vector, double new_vecto
 
 status_codes max_norms(Vector *** result, size_t * limit_norm_result_size, size_t * gelder_norm_result_size, size_t * scalar_norm_result_size, size_t dimension, 
                     double (*limit_norm)(Vector vec), double (*gelder_norm)(Vector vec, int p_arg), int p_arg_for_gelder, double (*scalar_norm)(Vector vec), int quantity, ...) {
+    if (p_arg_for_gelder < 1) return INVALID_PARAMETER;
+    
     (*result) = (Vector **)malloc(sizeof(Vector *) * 3);
     if (!(*result)) return NO_MEMORY;
     
