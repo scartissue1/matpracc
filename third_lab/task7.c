@@ -181,8 +181,9 @@ status_codes delete_firstLiverList(List ** head, Stack ** root, actions action, 
     return OK;
 }
 
-status_codes delete_LiverList(List * head, Stack ** root, const Liver value, actions action, unsigned int * result_id, int to_stack_flag) {
+status_codes delete_LiverList(List * head, Stack ** root, const Liver value, actions action, unsigned int * result_id, int to_stack_flag, int * action_count) {
     status_codes result = INVALID_PARAMETER;
+    int deleted = 0;
     while (head->next) {
         if (cmpLiver(value, head->next->data) == 0) {
             List * tmp = head->next;
@@ -193,9 +194,52 @@ status_codes delete_LiverList(List * head, Stack ** root, const Liver value, act
             result = OK;
             head->next = tmp->next;
             free(tmp);
-            break;
+            (*action_count)++;
+            deleted = 1;
         }
-        head = head->next;
+        if (!deleted) {
+            if (head->next) 
+                head = head->next;
+            else
+                return result;
+        }
+        deleted = 0;
+    }
+    return result;
+}
+
+status_codes change_LiverList(List ** head, Stack ** root, const Liver to_change, Liver changing, int * actions_count, int to_stack_flag) {
+    status_codes result = INVALID_PARAMETER;
+    List * start = (*head);
+    int deleted = 0;
+    while (start->next) {
+        if (cmpLiver(to_change, start->next->data) == 0) {
+            List * tmp = start->next;
+            if (to_stack_flag)
+                if (insertStack(root, tmp->data, changed) == NO_MEMORY)
+                    return NO_MEMORY;
+            result = OK;
+            start->next = tmp->next;
+            changing.id = tmp->data.id;
+            free(tmp);
+            if (!(*head) || time_compare((*head)->data.birth, changing.birth) > 0) {
+                if (initList(head, changing) == NO_MEMORY)
+                    return NO_MEMORY;
+            }
+            else {
+                if (insertList((*head), changing) == NO_MEMORY)
+                    return NO_MEMORY;
+            }
+            deleted = 1;
+            (*actions_count)++;
+        }
+        if (!deleted) {
+            if (start->next)
+                start = start->next;
+            else
+                return result;
+        }
+        deleted = 0;
     }
     return result;
 }
@@ -323,10 +367,10 @@ status_codes getLiver(Liver * value) {
 
 void print_menu();
 
-void change_backList(List * head, const Liver value) {
+void find_to_changeList(List * head, const Liver value, Liver * changing) {
     while (head) {
         if (value.id == head->data.id) {
-            head->data = value;
+            (*changing) = head->data;
             break;
         }
         head = head->next;
@@ -341,7 +385,25 @@ status_codes undo(List ** head, Stack ** root, int actions_count) {
         popStack(root, &value, &action);
         switch (action) {
             case changed:
-                change_backList((*head), value);
+                Liver to_change;
+                find_to_changeList((*head), value, &to_change);
+                unsigned int no_use = 0;
+                while (cmpLiver(to_change, (*head)->data) == 0) {
+                    if (delete_firstLiverList(head, root, changed, &no_use, 0) == NO_MEMORY)
+                        return NO_MEMORY;
+                    actions_count++;
+                
+                    if (!(*head) || time_compare((*head)->data.birth, value.birth) > 0)
+                        if (initList(head, value) == NO_MEMORY)
+                            return NO_MEMORY;
+                    else
+                        if (insertList((*head), value) == NO_MEMORY)
+                            return NO_MEMORY;
+                }
+            
+                status_codes status = change_LiverList(head, root, value, to_change, &actions_count, 0);
+                if (status == NO_MEMORY)
+                    return NO_MEMORY;
                 break;
             case deleted:
                 if (!(*head) || time_compare((*head)->data.birth, value.birth) > 0) {
@@ -354,11 +416,10 @@ status_codes undo(List ** head, Stack ** root, int actions_count) {
                 }
                 break;
             case added:
-                unsigned int no_use = 0;
                 if (value.id == (*head)->data.id)
                     delete_firstLiverList(head, root, action, &no_use, 0);
                 else
-                    delete_LiverList((*head), root, value, action, &no_use, 0);
+                    delete_LiverList((*head), root, value, action, &no_use, 0, &no_use);
         }
     }
 }
@@ -450,30 +511,31 @@ status_codes communicate(List ** root, int index) {
             if (getLiver(&changing) == INVALID_PARAMETER)
                 continue;
             unsigned int id = 0;
-            if (cmpLiver(to_change, (*root)->data) == 0) {
+            int in_first = 0;
+            while (cmpLiver(to_change, (*root)->data) == 0) {
+                in_first = 1;
                 if (delete_firstLiverList(root, &actionsStack, changed, &id, 1) == NO_MEMORY)
                     return NO_MEMORY;
-            }
-            else {
-                status_codes status = delete_LiverList((*root), &actionsStack, to_change, changed, &id, 1);
-                if (status == NO_MEMORY)
-                    return NO_MEMORY;
-                else if (status == INVALID_PARAMETER) {
-                    printf("No such citizen has been found\n");
-                    continue;
+                actions_count++;
+                changing.id = id;
+                if (!(*root) || time_compare((*root)->data.birth, changing.birth) > 0) {
+                    if (initList(root, changing) == NO_MEMORY)
+                        return NO_MEMORY;
+                }
+                else {
+                    if (insertList((*root), changing) == NO_MEMORY)
+                        return NO_MEMORY;
                 }
             }
-            changing.id = id;
-            if (time_compare((*root)->data.birth, changing.birth) > 0) {
-                if (initList(root, changing) == NO_MEMORY)
-                    return NO_MEMORY;
-            }
-            else {
-                if (insertList((*root), changing) == NO_MEMORY)
-                    return NO_MEMORY;
+            
+            status_codes status = change_LiverList(root, &actionsStack, to_change, changing, &actions_count, 1);
+            if (status == NO_MEMORY)
+                return NO_MEMORY;
+            else if (status == INVALID_PARAMETER && !in_first) {
+                printf("No such citizen has been found\n");
+                continue;
             }
             printf("Done\n");
-            actions_count++;
         }
         else if (strcmp(command, "add") == 0) {
             printf("Type the information about the citizen you want to add\n");
@@ -501,20 +563,20 @@ status_codes communicate(List ** root, int index) {
             unsigned int id = 0;
             if (getLiver(&to_delete) == INVALID_PARAMETER)
                 continue;
-            if (cmpLiver(to_delete, (*root)->data) == 0) {
+            int in_root_flag = cmpLiver(to_delete, (*root)->data) == 0;
+            if (in_root_flag) {
                 if (delete_firstLiverList(root, &actionsStack, deleted, &id, 1) == NO_MEMORY)
                     return NO_MEMORY;
             }
             else {
-                status_codes status = delete_LiverList((*root), &actionsStack, to_delete, deleted, &id, 1);
+                status_codes status = delete_LiverList((*root), &actionsStack, to_delete, deleted, &id, 1, &actions_count);
                 if (status == NO_MEMORY)
                     return NO_MEMORY;
-                else if (status == INVALID_PARAMETER) {
+                else if (status == INVALID_PARAMETER && !in_root_flag) {
                     printf("No such citizen has been found\n");
                     continue;
                 }
             }
-            actions_count++;
         }
         else if (strcmp(command, "print") == 0) {
             char path[BUFSIZ];
