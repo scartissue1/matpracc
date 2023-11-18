@@ -365,7 +365,10 @@ int main(int argc, char *argv[]) {
         printf("No such file\n");
         return -1;
     }
-    getCommand(programm);
+    if (getCommand(programm) == NO_MEMORY) {
+        printf("No memory\n");
+        return -1;
+    }
     fclose(programm);
     return 0;
 }
