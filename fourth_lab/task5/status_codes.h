@@ -1,11 +1,6 @@
 #ifndef __ST_CODES_H__
 #define __ST_CODES_H__
 
-#include <stdio.h>
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-
 typedef enum {
     OK,
     NO_MEMORY,
