@@ -54,14 +54,16 @@ status_codes loadArray(Array *arr, FILE *stream) {
         }
         else {
             string[size] = '\0';
-            if (!int_validation(string)) {
+            if (!int_validation(string) && size) {
                 free(string);
                 return INVALID_INPUT;
             }
-            int new_number = atoi(string);
-            if (push_backArray(arr, new_number) == NO_MEMORY) {
-                free(string);
-                return NO_MEMORY;
+            if (size || arr->size == 0) {
+                int new_number = atoi(string);
+                if (push_backArray(arr, new_number) == NO_MEMORY) {
+                    free(string);
+                    return NO_MEMORY;
+                }
             }
             size = 0;
             capacity = 2;
@@ -75,13 +77,15 @@ status_codes loadArray(Array *arr, FILE *stream) {
         symbol = fgetc(stream);
     }
     string[size] = '\0';
-    if (!int_validation(string)) {
+    if (!int_validation(string) && size) {
         return INVALID_INPUT;
     }
-    int new_number = atoi(string);
-    if (push_backArray(arr, new_number) == NO_MEMORY) {
-        free(string);
-        return NO_MEMORY;
+    if (size || arr->size == 0) {
+        int new_number = atoi(string);
+        if (push_backArray(arr, new_number) == NO_MEMORY) {
+            free(string);
+            return NO_MEMORY;
+        }
     }
     free(string);
     return OK;
@@ -94,16 +98,16 @@ void saveArray(Array *arr, FILE *stream) {
 }
 
 status_codes randArray(Array *arr, const int count, const int left_bound, const int right_bound) {
-    arr->size = count;
-    arr->capacity = arr->size;
     if (!arr->data) {
         arr->data = (int *)malloc(sizeof(int) * arr->capacity);
         if (!arr->data) {
             return NO_MEMORY;
         }
     }
-    for (int i = 0; i < arr->size; i++) {
-        arr->data[i] = rand() % (right_bound - left_bound + 1) + left_bound;
+    for (int i = 0; i < count; i++) {
+        if (push_backArray(arr, rand() % (right_bound - left_bound + 1) + left_bound) == NO_MEMORY) {
+            return NO_MEMORY;
+        }
     } 
     return OK;
 }

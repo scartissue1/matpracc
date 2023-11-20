@@ -42,7 +42,7 @@ status_codes saveProcessing(Node *root, const char *filename, const char array_n
     Array *arr = NULL;
     findNode(root, &arr, array_name);
     if (!arr) {
-        return INVALID_INPUT;
+        return UNINITIALIZED_VALUE;
     }
     FILE *stream = fopen(filename, "w");
     if (!stream) {
@@ -84,7 +84,7 @@ status_codes concatProcessing(Node **root, const char dest_name, const char src_
     findNode((*root), &dest, dest_name);
     findNode((*root), &src, src_name);
     if (!src) {
-        return INVALID_INPUT;
+        return UNINITIALIZED_VALUE;
     }
     int new_flag = 0;
     if (!dest) {
@@ -108,7 +108,7 @@ status_codes freeProcessing(Node *root, const char array_name) {
     Array *arr = NULL;
     findNode(root, &arr, array_name);
     if (!arr) {
-        return INVALID_INPUT;
+        return UNINITIALIZED_VALUE;
     }
     freeArray(arr);
     return OK;
@@ -118,7 +118,7 @@ status_codes removeProcessing(Node *root, const char array_name, const int start
     Array *arr = NULL;
     findNode(root, &arr, array_name);
     if (!arr) {
-        return INVALID_INPUT;
+        return UNINITIALIZED_VALUE;
     }
     if (start + count >= arr->size || start < 0 || count < 0) {
         return OUT_OF_BOUNDS;
@@ -134,7 +134,7 @@ status_codes copyProcessing(Node **root, const char src_name, const char dest_na
     Array *src = NULL;
     findNode((*root), &src, src_name);
     if (!src) {
-        return INVALID_INPUT;
+        return UNINITIALIZED_VALUE;
     }
     if (start >= src->size || end >= src->size || start < 0 || end < 0) {
         return OUT_OF_BOUNDS;
@@ -167,7 +167,7 @@ status_codes sortProcessing(Node *root, const char array_name, int sort_flag) {
     Array *arr = NULL;
     findNode(root, &arr, array_name);
     if (!arr) {
-        return INVALID_INPUT;
+        return UNINITIALIZED_VALUE;
     }
     (sort_flag == 0) ? sort_increaseArray(arr) : (sort_flag == 1) ? sort_decreaseArray(arr) : shuffleArray(arr);
     return OK;
@@ -177,7 +177,7 @@ status_codes statsProcessing(Node *root, const char array_name) {
     Array *arr = NULL;
     findNode(root, &arr, array_name);
     if (!arr) {
-        return INVALID_INPUT;
+        return UNINITIALIZED_VALUE;
     }
     statsArray(arr);
     return OK;
@@ -187,7 +187,7 @@ status_codes printProcessing(Node *root, const char array_name, int start, int e
     Array *arr = NULL;
     findNode(root, &arr, array_name);
     if (!arr) {
-        return INVALID_INPUT;
+        return UNINITIALIZED_VALUE;
     }
     if (start == -1 && end == -1) {
         start = 0;

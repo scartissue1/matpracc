@@ -7,18 +7,23 @@
 #include "BST.h"
 #include "command.h"
 
-void errorProcessing(status_codes error) {
-    if (error == NO_MEMORY) {
-        printf("No memory\n");
-    }
-    else if (error == INVALID_INPUT) {
-        printf("Invalid input\n");
-    }
-    else if (error == NO_FILE) {
-        printf("No such file\n");
-    }
-    else if (error == OUT_OF_BOUNDS) {
-        printf("Out of bounds of array\n");
+void errorProcessing(const status_codes error, const int line) {
+    switch (error) {
+        case NO_MEMORY:
+            printf("No memory after %d line\n", line);
+            return;
+        case INVALID_INPUT:
+            printf("Invalid input in %d line\n", line);
+            return;
+        case NO_FILE:
+            printf("No such file (%d line)\n", line);
+            return;
+        case OUT_OF_BOUNDS:
+            printf("Out of bounds of array in %d line\n", line);
+            return;
+        case UNINITIALIZED_VALUE:
+            printf("Uninitialized value used in %d line\n", line);
+            return;
     }
 }
 
@@ -89,13 +94,13 @@ status_codes makeCommand(char *command, Node **root) {
                     break;
                 case 2:
                     left_bound = atoi(token);
-                    if (!int_validation(token) || left_bound < 0) {
+                    if (!int_validation(token)) {
                         return INVALID_INPUT;
                     }
                     break;
                 case 3:
                     right_bound = atoi(token);
-                    if (!int_validation(token) || right_bound < 0) {
+                    if (!int_validation(token)) {
                         return INVALID_INPUT;
                     }
                     break;
@@ -130,7 +135,7 @@ status_codes makeCommand(char *command, Node **root) {
     }
     else if (strcmp(token, "free") == 0) {
         token = strtok(NULL, separators);
-        if (!token || strlen(token) > 1) {
+        if (!token || strlen(token) != 1 || !isalpha(token[0])) {
             return INVALID_INPUT;
         }
         char array_name = toupper(token[0]);
@@ -312,7 +317,11 @@ status_codes getCommand(FILE *programm) {
         return NO_MEMORY;
     }
     int command_flag = 0;
+    int line = 1;
     while (symbol != EOF) {
+        if (symbol == '\n') {
+            line++;
+        }
         command_flag = 0;
         command[command_size] = symbol;
         command_size++;
@@ -330,7 +339,7 @@ status_codes getCommand(FILE *programm) {
             command[command_size] = '\0';
             status_codes status = makeCommand(command, &root);
             if (status != OK) {
-                errorProcessing(status);
+                errorProcessing(status, line);
                 freeNode(root);
                 free(command);
                 return status;
@@ -360,13 +369,21 @@ status_codes getCommand(FILE *programm) {
 
 
 int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Wrong flag\n");
+        return -1;
+    }
     FILE *programm = fopen(argv[1], "r");
     if (!programm) {
         printf("No such file\n");
         return -1;
     }
-    if (getCommand(programm) == NO_MEMORY) {
+    status_codes status = getCommand(programm);
+    if (status == NO_MEMORY) {
         printf("No memory\n");
+        return -1;
+    }
+    else if (status != OK) {
         return -1;
     }
     fclose(programm);

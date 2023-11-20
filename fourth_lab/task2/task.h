@@ -11,7 +11,8 @@ typedef enum {
     NO_MEMORY,
     NO_FILE,
     OUT_OF_BOUNDS,
-    INVALID_INPUT
+    INVALID_INPUT,
+    UNINITIALIZED_VALUE
 } status_codes;
 
 int int_validation(const char * number);
