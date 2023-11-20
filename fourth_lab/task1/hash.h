@@ -7,44 +7,21 @@
 #include <ctype.h>
 
 #include "task.h"
-
-typedef struct {
-    char *key;
-    char *value;
-    unsigned long long int key_hash;
-} HashItem;
-
-typedef struct List {
-    HashItem *value;
-    struct List *next;
-} List;
+#include "list.h"
 
 typedef struct {
     List **data;
-    int *size_array;
+    unsigned long long (*hash_function)(const char *key);
     size_t hashsize;
-    size_t count;
 } HashTable;
 
 unsigned long long int hashFunction(const char *key);
 
-status_codes createItem(HashItem **new, const char *key, const char *value, int hash_flag, int key_hash);
-
-status_codes createList(List **new, HashItem *item);
-
-status_codes addList(List *root, HashItem *item);
-
-status_codes createTable(HashTable **new, const int size);
+status_codes createTable(HashTable **new, const int size, unsigned long long int (*hash_function)(const char *key));
 
 status_codes resizeTable(HashTable **new, HashTable *old);
 
-void freeItem(HashItem *data);
-
-void freeList(List *root);
-
 void freeTable(HashTable *data);
-
-int getListlength(List *root);
 
 int checkTable(HashTable *table);
 
