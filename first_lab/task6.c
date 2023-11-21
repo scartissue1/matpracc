@@ -93,8 +93,4 @@ int main (int argc, char * argv[]) {
     else printf("Wrong flag\n");
     
     return 0;
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 16ef40e (edit)

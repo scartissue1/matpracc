@@ -5,11 +5,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-<<<<<<< HEAD
-=======
-#define MAX_INT 2e30
-
->>>>>>> 16ef40e (edit)
 bool pre_num_validation (const char * number) {
     const int size = strlen(number);
     int index = 0, e_count = 0, _count = 0, dot_count = 0;
@@ -117,13 +112,6 @@ int main (int argc, char * argv[]) {
     }
     printf("Enter numbers in that base. All letters should be in uppercase. Type Stop to stop\nWrong numbers will be skipped\n");
     char * max = (char *)malloc(sizeof(char) * 2);
-<<<<<<< HEAD
-=======
-    if (!max) {
-        printf("No memory\n");
-        return -1;
-    }
->>>>>>> 16ef40e (edit)
     max[0] = '0';
     max[1] = '\0';
     int max_size = 2; 
@@ -147,10 +135,7 @@ int main (int argc, char * argv[]) {
                 }
             } 
             else break;
-<<<<<<< HEAD
             
-=======
->>>>>>> 16ef40e (edit)
         }
         else if (status == no_memory) {
             printf("No memory!\n");
@@ -175,8 +160,4 @@ int main (int argc, char * argv[]) {
     free(number);
     fflush(stdin);
     return 0;
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 16ef40e (edit)
