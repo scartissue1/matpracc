@@ -70,8 +70,14 @@ int main(int argc, char * argv[]) {
             printf("Invalid parameter\n");
             break;
     }
+<<<<<<< HEAD
     free_string(&_1);
     free_string(&_2);
     free_string(&_3);
+=======
+    free_string(_1);
+    free_string(_2);
+    free_string(_3);
+>>>>>>> 16ef40e (edit)
     return 0;
 }

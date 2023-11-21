@@ -47,7 +47,11 @@ void timesup_finder(Post * _post, size_t size);
 
 void print_mails(Post *_post, size_t size);
 
+<<<<<<< HEAD
 void free_post(Post ** _post, size_t size);
+=======
+void free_post(Post * _post, size_t size);
+>>>>>>> 16ef40e (edit)
 
 void print_menu();
 
@@ -62,7 +66,13 @@ status_codes create_adress(Adress * new, char * new_city, char * new_street, cha
     String * string_street = NULL;
     String * string_building = NULL;
     String * string_index = NULL;
+<<<<<<< HEAD
     if (init_string(&string_city, new_city) == NO_MEMORY || init_string(&string_street, new_street) == NO_MEMORY || init_string(&string_building, new_building) == NO_MEMORY || init_string(&string_index, new_index) == NO_MEMORY) return NO_MEMORY;
+=======
+    if (init_string(&string_city, new_city) == NO_MEMORY || init_string(&string_street, new_street) == NO_MEMORY || init_string(&string_building, new_building) == NO_MEMORY || init_string(&string_index, new_index) == NO_MEMORY) {
+        return NO_MEMORY;
+    }
+>>>>>>> 16ef40e (edit)
     new->city = string_city;
     new->building = string_building;
     new->street = string_street;
@@ -82,9 +92,21 @@ status_codes create_mail(Mail * new, Adress new_adress, char * new_weight_string
     if (init_string(&string_mail_id, new_mail_id) == NO_MEMORY || init_string(&string_new_creation, new_creation) == NO_MEMORY || init_string(&string_new_delivery, new_delivery) == NO_MEMORY) {
         return INVALID_PARAMETER;
     }
+<<<<<<< HEAD
     new->mail_id = string_mail_id;
     new->delivery = string_new_delivery;
     new->creation = string_new_creation;
+=======
+    if (copy_string_new(&new->mail_id, string_mail_id) == NO_MEMORY || copy_string_new(&new->delivery, string_new_delivery) == NO_MEMORY || copy_string_new(&new->creation, string_new_creation) == NO_MEMORY) {
+        free_string(string_mail_id);
+        free_string(string_new_creation);
+        free_string(string_new_delivery);
+        return NO_MEMORY;
+    }
+    free_string(string_mail_id);
+    free_string(string_new_creation);
+    free_string(string_new_delivery);
+>>>>>>> 16ef40e (edit)
     return OK;
 }
 
@@ -92,18 +114,30 @@ status_codes init_post(Post ** _post, Adress * _adress, size_t * size, size_t * 
     (*size) = 0;
     (*capacity) = 2;
     (*_post) = (Post *)malloc(sizeof(Post));
+<<<<<<< HEAD
+=======
+    if (!(*_post)) return NO_MEMORY;
+>>>>>>> 16ef40e (edit)
     (*_post)->adress = _adress;
     (*_post)->mails = (Mail *)malloc(sizeof(Mail) * (*capacity));
     if (!(*_post)->mails) return NO_MEMORY;
     return OK;
 }
 
+<<<<<<< HEAD
 status_codes find_mail(Post * _post, String * mail_id, size_t size) {
+=======
+status_codes find_mail(Post * _post, String * mail_id, size_t size, int print_need_flag) {
+>>>>>>> 16ef40e (edit)
     for (size_t i = 0; i < size; i++) {
         int cmp_result = 0;
         if (compare_string(&cmp_result, _post->mails[i].mail_id, mail_id) == INVALID_PARAMETER) return INVALID_PARAMETER;
         if (!cmp_result) {
+<<<<<<< HEAD
             print_mail(_post->mails[i]);
+=======
+            if (print_need_flag) print_mail(_post->mails[i]);
+>>>>>>> 16ef40e (edit)
             return OK;
         }
     }
@@ -111,7 +145,11 @@ status_codes find_mail(Post * _post, String * mail_id, size_t size) {
 }
 
 status_codes add_mail(Post ** _post, Mail _mail, size_t * size, size_t * capacity) {
+<<<<<<< HEAD
     if (find_mail((*_post), _mail.mail_id, (*size)) == OK) return INVALID_PARAMETER;
+=======
+    if (find_mail((*_post), _mail.mail_id, (*size), 0) == OK) return INVALID_PARAMETER;
+>>>>>>> 16ef40e (edit)
     (*_post)->mails[(*size)] = _mail;
     (*size)++;
     if ((*size) >= (*capacity)) {
@@ -119,6 +157,10 @@ status_codes add_mail(Post ** _post, Mail _mail, size_t * size, size_t * capacit
         Mail * tmp = (Mail *)realloc((*_post)->mails, sizeof(Mail) * (*capacity));
         if (!tmp) {
             free((*_post)->mails);
+<<<<<<< HEAD
+=======
+            free_post(*_post, *capacity);
+>>>>>>> 16ef40e (edit)
             return NO_MEMORY;
         }
         (*_post)->mails = tmp;
@@ -131,7 +173,11 @@ status_codes delete_mail(Post ** _post, String * mail_id, size_t size) {
         int cmp_result = 0;
         if (compare_string(&cmp_result, (*_post)->mails[i].mail_id, mail_id) == INVALID_PARAMETER) return INVALID_PARAMETER;
         if (!cmp_result) {
+<<<<<<< HEAD
             free_string(&(*_post)->mails[i].mail_id);
+=======
+            free_string((*_post)->mails[i].mail_id);
+>>>>>>> 16ef40e (edit)
             switch (init_string(&(*_post)->mails[i].mail_id, "0")) {
                 case OK:
                     return OK;
@@ -162,10 +208,17 @@ status_codes communicate() {
     scanf("%s", apartament_number);
     printf("Index (contains 6 numbers): ");
     scanf("%s", index);
+<<<<<<< HEAD
     printf("Done!\n\n");
     Adress post_adress;
     if (create_adress(&post_adress, city, street, house_number, building, apartament_number, index) == INVALID_PARAMETER) return INVALID_PARAMETER;
     if (init_post(&_post, &post_adress, &post_size, &post_capacity) == NO_MEMORY) return NO_MEMORY;
+=======
+    Adress post_adress;
+    if (create_adress(&post_adress, city, street, house_number, building, apartament_number, index) == INVALID_PARAMETER) return INVALID_PARAMETER;
+    if (init_post(&_post, &post_adress, &post_size, &post_capacity) == NO_MEMORY) return NO_MEMORY;
+    printf("Done!\n\n");
+>>>>>>> 16ef40e (edit)
     print_menu();
     while (1) {
         char command[BUFSIZ];
@@ -228,14 +281,25 @@ status_codes communicate() {
             if (tmp == NO_MEMORY) return NO_MEMORY;
             else if (tmp == INVALID_PARAMETER) {
                 printf("Invalid parameter detected\n");
+<<<<<<< HEAD
+=======
+                free_string(string_mail_id);
+>>>>>>> 16ef40e (edit)
                 continue;
             }
             if (delete_mail(&_post, string_mail_id, post_size) == INVALID_PARAMETER) {
                 printf("No such mail id has been found\n");
+<<<<<<< HEAD
                 free_string(&string_mail_id);
                 continue;
             }
             free_string(&string_mail_id);
+=======
+                free_string(string_mail_id);
+                continue;
+            }
+            free_string(string_mail_id);
+>>>>>>> 16ef40e (edit)
 
         }
         else if (strcmp(command, "find") == 0) {
@@ -245,6 +309,7 @@ status_codes communicate() {
             status_codes tmp = init_string(&string_mail_id, mail_id);
             if (tmp == NO_MEMORY) return NO_MEMORY;
             else if (tmp == INVALID_PARAMETER) {
+<<<<<<< HEAD
                 printf("Invalid parameter detected\n");
                 continue;
             }
@@ -254,6 +319,18 @@ status_codes communicate() {
                 continue;
             }
             free_string(&string_mail_id);
+=======
+                free_string(string_mail_id);
+                printf("Invalid parameter detected\n");
+                continue;
+            }
+            if (find_mail(_post, string_mail_id, post_size, 1) == INVALID_PARAMETER) {
+                printf("No such mail id has been found\n");
+                free_string(string_mail_id);
+                continue;
+            }
+            free_string(string_mail_id);
+>>>>>>> 16ef40e (edit)
         }
         else if (strcmp(command, "times_up") == 0) {
             qsort(_post->mails, post_size, sizeof(_post->mails[0]), time_compare_sort);
@@ -264,7 +341,11 @@ status_codes communicate() {
         else if (strcmp(command, "print_all") == 0) print_mails(_post, post_size);
         else printf("Wrong command\n");
     }
+<<<<<<< HEAD
     free_post(&_post, post_size);
+=======
+    free_post(_post, post_size);
+>>>>>>> 16ef40e (edit)
     return OK;
 }
 
@@ -274,6 +355,12 @@ int main(int argc, char * argv[]) {
         case NO_MEMORY:
             printf("No_memory\n");
             break;
+<<<<<<< HEAD
+=======
+        case INVALID_PARAMETER:
+            printf("Invalid parameter detected\n");
+            break;
+>>>>>>> 16ef40e (edit)
     }
     return 0;
 }
@@ -447,6 +534,7 @@ void print_mails(Post *_post, size_t size) {
     }
 }
 
+<<<<<<< HEAD
 void free_post(Post ** _post, size_t size) {
     for (int i = 0; i < size; i++) {
         free_string(&(*_post)->mails[i].adress.city);
@@ -459,6 +547,24 @@ void free_post(Post ** _post, size_t size) {
     }
     free((*_post)->mails);
     free(*_post);
+=======
+void free_post(Post * _post, size_t size) {
+    for (int i = 0; i < size; i++) {
+        free_string((_post)->mails[i].adress.city);
+        free_string((_post)->mails[i].adress.street);
+        free_string((_post)->mails[i].adress.building);
+        free_string((_post)->mails[i].adress.index);
+        free_string((_post)->mails[i].mail_id);
+        free_string((_post)->mails[i].creation);
+        free_string((_post)->mails[i].delivery);
+    }
+    free((_post)->mails);
+    free_string(_post->adress->building);
+    free_string(_post->adress->city);
+    free_string(_post->adress->index);
+    free_string(_post->adress->street);
+    free(_post);
+>>>>>>> 16ef40e (edit)
 }
 
 void print_menu() {

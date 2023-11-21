@@ -56,8 +56,9 @@ status_codes truth_table(const char *filename) {
     }
     char *infix = NULL;
     getline(&infix, &(size_t){0}, input);
-    if (!strlen(infix) || !infix) {
-        errorProcessing(ZERO_SIZE);
+    size_t infix_size = strlen(infix);
+    if (!infix_size || !infix || infix[infix_size - 1] == '\n') {
+        errorProcessing(WRONG_FILE);
         fclose(input);
         return INVALID_PARAMETER;
     }
@@ -155,8 +156,8 @@ void errorProcessing(const status_codes error) {
         case UNUSED_OPERATORS_OR_OPERANDS:
             printf("Invalid amount of operators or operands\n");
             return;
-        case ZERO_SIZE:
-            printf("Empty expression detected\n");
+        case WRONG_FILE:
+            printf("Empty expression or more than one strings detected in file\n");
             return;
     }
 }

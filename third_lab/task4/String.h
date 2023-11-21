@@ -27,6 +27,7 @@ status_codes init_string(String ** str, const char * new_string) {
     return OK;
 }
 
+<<<<<<< HEAD
 status_codes free_string(String ** str) {
     if (!(*str) || !(*str)->string) return INVALID_PARAMETER;
     free((*str)->string);
@@ -34,6 +35,15 @@ status_codes free_string(String ** str) {
     (*str)->size = 0;
     free(*str);
     *str = NULL;
+=======
+status_codes free_string(String * str) {
+    if (!str->string) return INVALID_PARAMETER;
+    free(str->string);
+    str->string = NULL;
+    str->size = 0;
+    free(str);
+    str = NULL;
+>>>>>>> 16ef40e (edit)
     return OK;
 }
 
@@ -63,12 +73,20 @@ status_codes compare_string(int * result, const String * str1, const String * st
 
 status_codes copy_string(String ** destination, const String * source) {
     if (!source || !source->string) return INVALID_PARAMETER;
+<<<<<<< HEAD
     if (free_string(destination) == INVALID_PARAMETER) return INVALID_PARAMETER;
+=======
+    if (free_string(*destination) == INVALID_PARAMETER) return INVALID_PARAMETER;
+>>>>>>> 16ef40e (edit)
     switch (init_string(destination, source->string)) {
         case OK: return OK;
         case NO_MEMORY: return NO_MEMORY;
         case INVALID_PARAMETER: return INVALID_PARAMETER;
     }
+<<<<<<< HEAD
+=======
+    //return init_string(destination, source->string);
+>>>>>>> 16ef40e (edit)
 }
 
 status_codes copy_string_new(String ** destination, const String * source) {
@@ -85,8 +103,13 @@ status_codes concat_strings(String ** str1, String * str2) {
     size_t new_size = (*str1)->size + str2->size + 1;
     char * tmp = (char *)realloc((*str1)->string, sizeof(char) * new_size);
     if (!tmp) {
+<<<<<<< HEAD
         free_string(str1);
         free_string(&str2);
+=======
+        free_string(*str1);
+        free_string(str2);
+>>>>>>> 16ef40e (edit)
         return NO_MEMORY;
     }
     (*str1)->string = tmp;
@@ -94,4 +117,8 @@ status_codes concat_strings(String ** str1, String * str2) {
     (*str1)->string[new_size] = '\0';
     (*str1)->size = new_size;
     return OK;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 16ef40e (edit)

@@ -580,4 +580,8 @@ int main(int argc, char * argv[]) {
     }
     fclose(file);
     return 0;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 16ef40e (edit)
