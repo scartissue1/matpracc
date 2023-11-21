@@ -7,7 +7,7 @@ typedef enum {
     NO_FILE,
     INVALID_PARAMETER,
     INVALID_BRACKET,
-    ZERO_SIZE,
+    INVALID_FILE,
     UNUSED_OPERATORS_OR_OPERANDS
 } status_codes;
 
