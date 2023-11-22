@@ -62,7 +62,7 @@ status_codes to_postfix(char **postfix, const char *infix) {
         }
         else if (infix[i] == ')') {
             while (1) {
-                int from_stack;
+                long long from_stack;
                 if (popStack(&operators, &from_stack) == INVALID_PARAMETER) {
                     free(*postfix);
                     freeStack(operators);
@@ -101,7 +101,7 @@ status_codes to_postfix(char **postfix, const char *infix) {
             }
             int copy_priority = getPriority(copy);
             while (operators && (getPriority(operators->head) > copy_priority)) {
-                int from_stack;
+                long long from_stack;
                 if (popStack(&operators, &from_stack) == INVALID_PARAMETER) {
                     break;
                 }
@@ -116,7 +116,7 @@ status_codes to_postfix(char **postfix, const char *infix) {
             }
         }
     }
-    int from_stack;
+    long long from_stack;
     while (popStack(&operators, &from_stack) != INVALID_PARAMETER) {
         if (from_stack == '(') {
             freeStack(operators);
@@ -132,7 +132,7 @@ status_codes to_postfix(char **postfix, const char *infix) {
     return OK;
 }
 
-status_codes postfix_compute(int *result, const char *postfix) {
+status_codes postfix_compute(long long *result, const char *postfix) {
     Stack *operands = NULL;
     size_t postfix_size = strlen(postfix);
     if (!postfix || !postfix_size) {
@@ -172,7 +172,7 @@ status_codes postfix_compute(int *result, const char *postfix) {
             }
             i--;
             number[number_size] = '\0';
-            if (pushStack(&operands, atoi(number)) == NO_MEMORY) {
+            if (pushStack(&operands, atoll(number)) == NO_MEMORY) {
                 free(number);
                 freeStack(operands);
                 return NO_MEMORY;
@@ -188,13 +188,13 @@ status_codes postfix_compute(int *result, const char *postfix) {
             number = tmp;
         }
         else {
-            int first_value, second_value;
+            long long first_value, second_value;
             if (popStack(&operands, &first_value) == INVALID_PARAMETER) {
                 free(number);
                 freeStack(operands);
                 return UNUSED_DIGITS_OR_OPERATORS;
             }
-            int res = 0;
+            long long res = 0;
             if (postfix[i] == '~') {
                 res = -first_value;
             }

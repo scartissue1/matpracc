@@ -16,6 +16,6 @@ int getPriority(const char operator);
 
 status_codes to_postfix(char **postfix, const char *infix);
 
-status_codes postfix_compute(int *result, const char *postfix);
+status_codes postfix_compute(long long *result, const char *postfix);
 
 #endif

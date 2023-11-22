@@ -81,7 +81,7 @@ status_codes processFiles(const int files_quantity, char *filenames[]) {
                 return NO_MEMORY;
             }
             
-            int compute = 0;
+            long long compute = 0;
             status = postfix_compute(&compute, postfix);
             if (status != OK) {
                 if (status == NO_MEMORY) {

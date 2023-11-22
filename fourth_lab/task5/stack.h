@@ -6,13 +6,13 @@
 #include "status_codes.h"
 
 typedef struct Stack {
-    int head;
+    long long head;
     struct Stack *tail;
 } Stack;
 
-status_codes pushStack(Stack **ptr, const int data);
+status_codes pushStack(Stack **ptr, const long long data);
 
-status_codes popStack(Stack **ptr, int *out);
+status_codes popStack(Stack **ptr, long long *out);
 
 void freeStack(Stack *ptr);
 

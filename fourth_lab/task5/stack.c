@@ -1,6 +1,6 @@
 #include "stack.h"
 
-status_codes pushStack(Stack **ptr, const int data) {
+status_codes pushStack(Stack **ptr, const long long data) {
     Stack *tmp = (Stack *)malloc(sizeof(Stack));
     if (!tmp) {
         return NO_MEMORY;
@@ -11,7 +11,7 @@ status_codes pushStack(Stack **ptr, const int data) {
     return OK;
 }
 
-status_codes popStack(Stack **ptr, int *out) {
+status_codes popStack(Stack **ptr, long long *out) {
     if (!(*ptr)) {
         return INVALID_PARAMETER;
     }
