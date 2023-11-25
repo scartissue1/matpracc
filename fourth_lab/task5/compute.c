@@ -93,6 +93,7 @@ status_codes to_postfix(char **postfix, const char *infix) {
                     }
                     if (isdigit(infix[j])) {
                         binary = 1;
+                        break;
                     }
                 }
                 if (!binary) {
@@ -239,6 +240,11 @@ status_codes postfix_compute(long long *result, const char *postfix) {
                         break;
                     case '^':
                         if (first_value < 0) {
+                            free(number);
+                            freeStack(operands);
+                            return NEGATIVE_POWER;
+                        }
+                        if (!first_value && !second_value) {
                             free(number);
                             freeStack(operands);
                             return NEGATIVE_POWER;

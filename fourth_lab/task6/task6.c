@@ -27,10 +27,15 @@ status_codes getVariables(char **variables_array, const char *infix) {
         if (!isalpha(infix[i])) {
             continue;
         }
+        int is_equal = 0;
         for (int j = 0; j < array_size; j++) {
             if (infix[i] == (*variables_array)[j]) {
-                continue;
+                is_equal = 1;
+                break;
             }
+        }
+        if (is_equal) {
+            continue;
         }
         (*variables_array)[array_size] = infix[i];
         array_size++;
@@ -91,10 +96,10 @@ status_codes truth_table(const char *filename) {
         return NO_MEMORY;
     };
     int vars_count = strlen(vars);
-    int combinations_count = 1 << vars_count;
+    long long int combinations_count = 1 << vars_count;
     int vars_values[vars_count];
     printHead(out, vars, vars_count, infix);
-    for (int i = 0; i < combinations_count; i++) {
+    for (long long int i = 0; i < combinations_count; i++) {
         for (int j = 0; j < vars_count; j++) {
             vars_values[j] = (i >> j) & 1;
         }
@@ -175,6 +180,7 @@ void getFilename(char *filename) {
             i++;
         }
     }
-    strcat(result, ".txt\0");
+    result[size] = '\0';
+    strcat(result, ".txt");
     strcpy(filename, result);
 }

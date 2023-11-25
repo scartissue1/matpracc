@@ -26,7 +26,7 @@ status_codes randArray(Array *arr, int count, int left_bound, int right_bound);
 
 status_codes concatArray(Array *dest, Array *src);
 
-void freeArray(Array *arr);
+status_codes freeArray(Array *arr);
 
 void removeArray(Array *arr, int start, int count);
 

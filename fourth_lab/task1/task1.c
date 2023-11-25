@@ -81,15 +81,6 @@ status_codes changeFile(const char *filename) {
             }
             word[word_size] = '\0';
             strcpy(value, word);
-            if (!value) {
-                free(word);
-                rename(tmp_name, filename);
-                fclose(tmp);
-                fclose(stream);
-                freeTable(hash);
-                return NO_MEMORY;
-            }
-            
             if (insertTable(hash, key, value, 0, -1) == NO_MEMORY) {
                 free(word);
                 rename(tmp_name, filename);
@@ -166,7 +157,6 @@ status_codes changeFile(const char *filename) {
     }
     if (word) {
         word[word_size] = '\0';
-
         char *found = findTable(hash, word);
         if (!found) {
             fprintf(tmp, "%s", word);

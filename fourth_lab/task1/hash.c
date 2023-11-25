@@ -2,10 +2,16 @@
 
 unsigned long long int hashFunction(const char *key) {
     size_t key_size = strlen(key);
+    if (!key_size) {
+        return 0;
+    }
     unsigned long long int result = 0;
     int power = 1;
     for (int i = key_size; i >= 0; i--) {
-        result += power * (isdigit(key[i])) ? key[i] - '0' : ('A' <= key[i] && key[i] <= 'Z') ? key[i] - 'A' + 10 : key[i] - 'a' + 36;
+        if (key[i] == '\0') {
+            continue;
+        }
+        result += power * ((isdigit(key[i])) ? key[i] - '0' : ('A' <= key[i] && key[i] <= 'Z') ? key[i] - 'A' + 10 : key[i] - 'a' + 36);
         power *= 62;
     }
     return result;
@@ -17,9 +23,10 @@ status_codes createTable(HashTable **new, const int size, unsigned long long int
         return NO_MEMORY;
     }
     (*new)->hashsize = size;
-    (*new)->data = (List **)malloc(sizeof(List *) * size);
+    (*new)->data = (List **)malloc(sizeof(List*) * size);
     if (!(*new)->data) {
         free(*new);
+        *new = NULL;
         return NO_MEMORY;
     }
     for (int i = 0; i < (*new)->hashsize; i++) {
@@ -68,9 +75,14 @@ int checkTable(HashTable *table) {
                 max = table->data[i]->size;
             }
         }
+        else {
+            min = 0;
+        }
     }
-    if (min != 0 && max / min >= 2) {
-        return 1;
+    if (min != 0) {
+        if (max / min >= 2) {
+            return 1;
+        }
     }
     return 0;
 }
@@ -95,15 +107,18 @@ status_codes insertTable(HashTable *table, const char *key, const char *value, i
     return OK;
 }
 
-char *findTable(HashTable *table, const char *key) {
-    int key_hash = hashFunction(key);
-    int index = key_hash % table->hashsize;
+char *compare(List *root, const char *key) {
+    if (!root) {
+        return NULL;
+    }
+    if (strcmp(root->value->key, key) == 0) {
+        return root->value->value;
+    }
+    compare(root->next, key);
+}
 
-    while (table->data[index]) {
-        if (strcmp(table->data[index]->value->key, key) == 0) {
-            return table->data[index]->value->value;
-        }
-        table->data[index] = table->data[index]->next;
-    } 
-    return NULL;
+char *findTable(HashTable *table, const char *key) {
+    int key_hash = table->hash_function(key);
+    int index = key_hash % table->hashsize;
+    return compare(table->data[index], key);
 }

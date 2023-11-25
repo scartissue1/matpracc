@@ -19,7 +19,7 @@ void errorProcessing(const status_codes error, FILE *stream, const char *infix, 
             fprintf(stream, "Negative number in division with remainder\n");
             return;
         case NEGATIVE_POWER:
-            fprintf(stream, "Negative power\n");
+            fprintf(stream, "Invalid power: negative power or 0^0 detected\n");
             return;
         case NOT_DIGIT_OR_OPERATOR:
             fprintf(stream, "Expression should contain only digits and allowed operators (+, -, *, /, %%, ^)to be computed\n");

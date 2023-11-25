@@ -193,18 +193,18 @@ int computeTree(Node *root, const char *vars, const int *values, const int vars_
         case '|':
             return left | right;
         case '~':
-            return ~left;
+            return !left;
         case '-':
-            return ~left | right;
+            return left <= right;
         case '+':
-            return ~(~left | right);
+            return left > right;
         case '<':
             return left != right;
         case '=':
             return left == right;
         case '!':
-            return ~(left & right);
+            return !(left & right);
         case '?':
-            return ~(left | right);
+            return !(left | right);
     }
 }

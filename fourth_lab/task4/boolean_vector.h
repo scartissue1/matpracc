@@ -3,14 +3,26 @@
 
 #include <stdlib.h>
 
-#include "status_codes.h"
+#include "task.h"
 
 typedef struct {
-    int *array;
+    char name;
+    unsigned char *array;
     size_t size;
-    size_t capacity;
 } BooleanVector;
 
+status_codes initVector(BooleanVector **ptr, const size_t size, const char name);
 
+void freeVector(BooleanVector *ptr);
+
+status_codes readVector(BooleanVector **ptr, const char *number, const int base);
+
+status_codes writeVector(BooleanVector **ptr, const char **result, const int base);
+
+status_codes binary_actionVector(BooleanVector **result, const char result_name, BooleanVector *first, BooleanVector *second, binary_actions action);
+
+void inverseVector(BooleanVector *ptr);
+
+void printVector(FILE *stream, BooleanVector *ptr);
 
 #endif

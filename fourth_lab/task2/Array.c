@@ -126,9 +126,15 @@ status_codes concatArray(Array *dest, Array *src) {
     return OK;
 }
 
-void freeArray(Array *arr) {
+status_codes freeArray(Array *arr) {
     arr->size = 0;
     arr->capacity = 2;
+    int *tmp = NULL;
+    if (!(tmp = (int *)realloc(arr->data, sizeof(int) * arr->capacity))) {
+        return NO_MEMORY;
+    }
+    arr->data = tmp;
+    return OK;
 }
 
 void removeArray(Array *arr, const int start, const int count) {

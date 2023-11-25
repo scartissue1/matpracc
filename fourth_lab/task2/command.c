@@ -110,7 +110,9 @@ status_codes freeProcessing(Node *root, const char array_name) {
     if (!arr) {
         return UNINITIALIZED_VALUE;
     }
-    freeArray(arr);
+    if (freeArray(arr) == NO_MEMORY) {
+        return NO_MEMORY;
+    }
     return OK;
 }
 

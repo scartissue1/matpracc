@@ -17,41 +17,6 @@ typedef struct Node {
     struct Node * right;
 } Node;
 
-typedef struct Stack {
-    int count;
-    char * word;
-    struct Stack * next;
-} Stack;
-
-status_codes insertStack(Stack ** root, const int count, const char * word) {
-    Stack * tmp = (Stack *)malloc(sizeof(Stack));
-    if (!tmp)
-        return NO_MEMORY;
-    size_t word_size = strlen(word);
-    tmp->word = (char *)malloc(sizeof(char) * word_size);
-    memcpy(tmp->word, word, word_size);
-    tmp->word[word_size] = '\0';
-    tmp->count = count;
-    tmp->next = (*root);
-    (*root) = tmp;
-    return OK;
-}
-
-status_codes popStack(Stack ** root, int * count, char ** word) {
-    if (!(*root))
-        return INVALID_PARAMETER;
-    Stack * tmp = (*root);
-    (*root) = tmp->next;
-    (*count) = tmp->count;
-    size_t word_size = strlen(tmp->word);
-    (*word) = (char *)malloc(sizeof(char) * word_size);
-    memcpy((*word), tmp->word, word_size);
-    (*word)[word_size] = '\0';
-    free(tmp->word);
-    free(tmp);
-    return OK;
-}
-
 status_codes addNode(Node ** ptr, const char * word) {
     if (!(*ptr)) {
         (*ptr) = (Node *)malloc(sizeof(Node));
@@ -318,6 +283,7 @@ status_codes communicate(Node * root) {
             FILE * file1 = fopen(path, "r");
             get_from_file(file1, &new_root);
             printNode(new_root, stdout, 0);
+            freeNode(new_root);
             fclose(file1);
 
         }
