@@ -32,7 +32,7 @@ status_codes get_file(founds ** result, int * result_size, char * substring, int
 int main(int argc, char * argv[]) {
     founds * result = NULL;
     int result_capacity;
-    switch (get_file(&result, &result_capacity, "\n\t\t", 2, "input1.txt", "input2.txt")) {
+    switch (get_file(&result, &result_capacity, "", 2, "input1.txt", "input2.txt")) {
         case OK:
             for (int i = 0; i < result_capacity; i++) {
                 if (result[i].row != 0) {
@@ -63,7 +63,7 @@ status_codes get_file(founds ** result, int * result_capacity, char * substring,
     if (!substring_size) {
         return ZERO_SIZE;
     }
-    
+
     if (quantity < 1 || !substring) return INVALID_PARAMETER;
     (*result_capacity) = 2;
     (*result) = (founds *)malloc(sizeof(founds) * (*result_capacity));
