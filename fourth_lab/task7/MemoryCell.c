@@ -16,7 +16,7 @@ void freeArrayCell(ArrayCell array, size_t size) {
 }
 
 int comp(const MemoryCell **first, const MemoryCell ** second) {
-    return strcmp((*first) -> name, (*second) -> name);
+    return strcmp((*first)->name, (*second)->name);
 }
 
 status_codes initializeArray(ArrayCell *array, size_t *size, size_t *capacity) {
