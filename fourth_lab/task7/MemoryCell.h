@@ -15,7 +15,7 @@ void freeMemoryCell(MemoryCell *cell);
 
 void freeArrayCell(ArrayCell array, size_t size);
 
-int comp(const void *left, const void *right);
+int comp(const MemoryCell **first, const MemoryCell ** second);
 
 status_codes initializeArray(ArrayCell *array, size_t *size, size_t *capacity);
 

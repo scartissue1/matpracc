@@ -15,8 +15,8 @@ void freeArrayCell(ArrayCell array, size_t size) {
     free(array);
 }
 
-int comp(const void *left, const void *right) {
-    return strcmp(((MemoryCell *)left)->name, ((MemoryCell *)right)->name);
+int comp(const MemoryCell **first, const MemoryCell ** second) {
+    return strcmp((*first) -> name, (*second) -> name);
 }
 
 status_codes initializeArray(ArrayCell *array, size_t *size, size_t *capacity) {
@@ -54,7 +54,7 @@ status_codes addCell(ArrayCell *array, size_t *size, size_t *capacity, const cha
         }
         (*array) = tmp2;
     }
-    qsort((*array), (*size), sizeof(MemoryCell *), comp);
+    qsort((*array), (*size), sizeof((*array)[0]), (int(*) (const void *, const void *))comp);
     return OK;
 }
 
