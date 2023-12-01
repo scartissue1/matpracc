@@ -2,27 +2,36 @@
 
 void printPolynomial(Polynomial * head, int first_flag) {
     if (!head) {
-        return;
-    }
-    if (head->coefficient == 0 && head->power == 0) {
         if (first_flag) {
             printf("0\n");
         }
         return;
     }
-    int coef_flag = 0;
-    if (head->coefficient) {
-        if (!first_flag) {
-            if (head->coefficient > 0) {
-                printf(" + ");
+    if (head->coefficient == 0) {
+        if (first_flag) {
+            if (!head->next) {
+                printf("0\n");
             }
             else {
-                printf(" - ");
-                head->coefficient = -head->coefficient;
+                printPolynomial(head->next, 1);
+            }
+            return;
+        }
+        printPolynomial(head->next, 0);
+        return;
+    }
+    int coef_flag = 0;
+    if (head->coefficient) {
+        if (head->coefficient > 0) {
+            if (!first_flag) {
+                printf(" + ");
             }
         }
+        else {
+            printf(" - ");
+        }
         if (head->coefficient != 1) {
-            printf("%d", head->coefficient);
+            printf("%d", abs(head->coefficient));
             coef_flag = 1;
         }
     }
@@ -50,6 +59,10 @@ void freePolynomial(Polynomial * head) {
 }
 
 status_codes push_forwardPolynomial(Polynomial ** head, int _coefficient, int _power) {
+    if (*head && (*head)->power == _power) {
+        (*head)->coefficient += _coefficient;
+        return OK;
+    } 
     Polynomial * tmp = (Polynomial *)malloc(sizeof(Polynomial));
     if (!tmp) {
         return NO_MEMORY;
@@ -62,8 +75,12 @@ status_codes push_forwardPolynomial(Polynomial ** head, int _coefficient, int _p
 }
 
 status_codes push_backPolynomial(Polynomial * head, int _coefficient, int _power) {
-    while (head->next && head->next->power > _power) {
+    while (head->next && head->next->power >= _power) {
         head = head->next;
+    }
+    if (head->power == _power) {
+        head->coefficient += _coefficient;
+        return OK;
     }
     Polynomial * tmp = (Polynomial *)malloc(sizeof(Polynomial));
     if (!tmp) {
@@ -85,7 +102,7 @@ status_codes add(Polynomial ** result, Polynomial * first, Polynomial * second) 
     while (1) {
         if (first && second) {
             if (first->power == second->power) {
-                if (!(*result)) {
+                if (!(*result) || (*result)->power == first->power) {
                     if (push_forwardPolynomial(result, first->coefficient + second->coefficient, first->power) == NO_MEMORY) {
                         return NO_MEMORY;
                     }
@@ -100,7 +117,7 @@ status_codes add(Polynomial ** result, Polynomial * first, Polynomial * second) 
                 second = second->next;
             }
             else if (first->power > second->power) {
-                if (!(*result)) {
+                if (!(*result) || (*result)->power == first->power) {
                     if (push_forwardPolynomial(result, first->coefficient, first->power) == NO_MEMORY) {
                         return NO_MEMORY;
                     }
@@ -113,7 +130,7 @@ status_codes add(Polynomial ** result, Polynomial * first, Polynomial * second) 
                 first = first->next;
             }
             else if (second->power > first->power) {
-                if (!(*result)) {
+                if (!(*result) || (*result)->power == second->power) {
                     if (push_forwardPolynomial(result, second->coefficient, second->power) == NO_MEMORY) {
                         return NO_MEMORY;
                     }
@@ -127,7 +144,7 @@ status_codes add(Polynomial ** result, Polynomial * first, Polynomial * second) 
             }
         }
         else if (!second && first) {
-            if (!(*result)) {
+            if (!(*result) || (*result)->power == first->power) {
                 if (push_forwardPolynomial(result, first->coefficient, first->power) == NO_MEMORY) {
                     return NO_MEMORY;
                 }
@@ -140,7 +157,7 @@ status_codes add(Polynomial ** result, Polynomial * first, Polynomial * second) 
             first = first->next;
         }
         else if (!first && second) {
-            if (!(*result)) {
+            if (!(*result) || (*result)->power == second->power) {
                 if (push_forwardPolynomial(result, second->coefficient, second->power) == NO_MEMORY) {
                     return NO_MEMORY;
                 }
@@ -156,13 +173,14 @@ status_codes add(Polynomial ** result, Polynomial * first, Polynomial * second) 
             return OK;
         }
     }
+
 }
 
 status_codes sub(Polynomial ** result, Polynomial * first, Polynomial * second) {
     while (1) {
         if (first && second) {
             if (first->power == second->power) {
-                if (!(*result)) {
+                if (!(*result) || (*result)->power == first->power) {
                     if (push_forwardPolynomial(result, first->coefficient - second->coefficient, first->power) == NO_MEMORY) {
                         return NO_MEMORY;
                     }
@@ -177,7 +195,7 @@ status_codes sub(Polynomial ** result, Polynomial * first, Polynomial * second) 
                 second = second->next;
             }
             else if (first->power > second->power) {
-                if (!(*result)) {
+                if (!(*result) || (*result)->power == first->power) {
                     if (push_forwardPolynomial(result, first->coefficient, first->power) == NO_MEMORY) {
                         return NO_MEMORY;
                     }
@@ -190,7 +208,7 @@ status_codes sub(Polynomial ** result, Polynomial * first, Polynomial * second) 
                 first = first->next;
             }
             else if (second->power > first->power) {
-                if (!(*result)) {
+                if (!(*result) || (*result)->power == second->power) {
                     if (push_forwardPolynomial(result, -second->coefficient, second->power) == NO_MEMORY) {
                         return NO_MEMORY;
                     }
@@ -204,7 +222,7 @@ status_codes sub(Polynomial ** result, Polynomial * first, Polynomial * second) 
             }
         }
         else if (!second && first) {
-            if (!(*result)) {
+            if (!(*result) || (*result)->power == first->power) {
                 if (push_forwardPolynomial(result, first->coefficient, first->power) == NO_MEMORY) {
                     return NO_MEMORY;
                 }
@@ -217,7 +235,7 @@ status_codes sub(Polynomial ** result, Polynomial * first, Polynomial * second) 
             first = first->next;
         }
         else if (!first && second) {
-            if (!(*result)) {
+            if (!(*result) || (*result)->power == second->power) {
                 if (push_forwardPolynomial(result, -second->coefficient, second->power) == NO_MEMORY) {
                     return NO_MEMORY;
                 }
@@ -380,13 +398,12 @@ double binary_pow(double base, int power) {
     }
 }
 
-status_codes eval(int * result, Polynomial * poly, const double value) {
+void eval(double *result, Polynomial * poly, const double value) {
     if (!poly) {
-        return OK;
+        return;
     }
     (*result) += poly->coefficient * binary_pow(value, poly->power);
     eval(result, poly->next, value);
-    return OK;
 }
 
 status_codes cmps(Polynomial ** result, Polynomial * first, Polynomial * second) {
@@ -394,20 +411,27 @@ status_codes cmps(Polynomial ** result, Polynomial * first, Polynomial * second)
         return OK;
     }
     Polynomial * second_base = NULL;
-    if (copyPolynomial(&second_base, second) == NO_MEMORY) {
-        return NO_MEMORY;
+    if (first->power == 0) {
+        if (push_forwardPolynomial(&second_base, 1, 0) == NO_MEMORY) {
+            return NO_MEMORY;
+        }
     }
-    for (int i = 0; i < first->power - 1; i++) {
-        Polynomial * tmp = NULL;
-        if (mult(&tmp, second_base, second) == NO_MEMORY) {
+    else {
+        if (copyPolynomial(&second_base, second) == NO_MEMORY) {
             return NO_MEMORY;
         }
-        freePolynomial(second_base);
-        second_base = NULL;
-        if (copyPolynomial(&second_base, tmp) == NO_MEMORY) {
-            return NO_MEMORY;
+        for (int i = 0; i < first->power - 1; i++) {
+            Polynomial * tmp = NULL;
+            if (mult(&tmp, second_base, second) == NO_MEMORY) {
+                return NO_MEMORY;
+            }
+            freePolynomial(second_base);
+            second_base = NULL;
+            if (copyPolynomial(&second_base, tmp) == NO_MEMORY) {
+                return NO_MEMORY;
+            }
+            freePolynomial(tmp);
         }
-        freePolynomial(tmp);
     }
     multconst(second_base, first->coefficient);
     Polynomial * tmp2 = NULL;
@@ -421,15 +445,24 @@ status_codes cmps(Polynomial ** result, Polynomial * first, Polynomial * second)
     }
     freePolynomial(tmp2);
     freePolynomial(second_base);
-    cmps(result, first->next, second);
-    return OK;
+    return cmps(result, first->next, second);
 }
 
-status_codes diff(Polynomial * poly) {
+void diff(Polynomial * poly) {
     if (!poly) {
-        return OK;
+        return;
     }
     poly->coefficient *= poly->power;
     poly->power--;
     diff(poly->next);
+}
+
+int isZero(Polynomial *poly) {
+    if (!poly) {
+        return 1;
+    }
+    if (poly->coefficient != 0) {
+        return 0;
+    }
+    return isZero(poly->next);
 }

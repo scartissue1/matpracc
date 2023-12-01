@@ -5,563 +5,439 @@
 
 #include "Polynomial.h"
 
-status_codes get_polynomial(Polynomial ** poly, const int start, const int end, const char * command) {
-    int x_flag = 0;
-    int coef_size = 0;
-    int coef_capacity = 2;
-    char * strcoef = (char *)malloc(sizeof(char) * coef_capacity);
-    if (!strcoef) {
+int double_validation(const char * number) {
+    const size_t size = strlen(number);
+    if (!size) return 0;
+    size_t index = 0;
+    int e_count = 0, dot_count = 0;
+    int fl = 0;
+    while (index < size) {
+        if (number[index] == 'e') e_count++;
+        if (number[index] == '.') dot_count++;
+        if (e_count > 1 || dot_count > 1 || (!isdigit(number[index]) && (number[index] != 'e' && number[index] != '.'))) return 0;
+        if (isdigit(number[index])) fl = 1;
+        index++;
+    }
+    return (1 && fl);
+}
+
+int int_validation(const char *number) {
+    const size_t size = strlen(number);
+    if (!size) {
+        return 0;
+    }
+    if (!isdigit(number[0]) && number[0] != '-' && number[0] != '+') {
+        return 0;
+    }
+    int digit_flag = isdigit(number[0]);
+    for (size_t i = 1; i < size; i++) {
+        if (!isdigit(number[i])) {
+            return 0;
+        }
+        else {
+            digit_flag = 1;
+        }
+    }
+    return (1 && digit_flag);
+}
+
+status_codes deleteString(char **string, size_t *size, size_t *capacity) {
+    (*size) = 0;
+    (*capacity) = 2;
+    char *tmp = NULL;
+    if (!(tmp = (char *)realloc((*string), sizeof(char) * (*capacity)))) {
+        free(*string);
         return NO_MEMORY;
     }
-    strcoef[0] = '0';
-    strcoef[1] = '\0';
-    int coef = 0;
-    int power_size = 0;
-    int power_capacity = 2;
-    char * strpower = (char *)malloc(sizeof(char) * power_capacity);
-    if (!strpower) {
-        return NO_MEMORY;
-    }
-    strpower[0] = '0';
-    strpower[1] = '\0';
-    int power = 0;
-    int done = 0;
-    int max_power = -1;
-    int digit_flag = 0;
-    for (int i = start; i < end; i++) {
-        //printf("%c", command[i]);
-        if (command[i] == 'x') {
-            x_flag = 1;
-            strcoef[coef_size] = '\0';
-            if (!strlen(strcoef)) {
-                coef = 1;
-            }
-            else if (strcmp(strcoef, "-") == 0) {
-                coef = -1;
-            }
-            else {
-                coef = atoi(strcoef);
-            }
-            free(strcoef);
-            coef_size = 0;
-            coef_capacity = 2;
-            strcoef = (char *)malloc(sizeof(char) * coef_capacity);
-            if (!strcoef) {
-                return NO_MEMORY;
-            }
-        }
-        if (!x_flag && (isdigit(command[i]) || command[i] == '-')) {
-            strcoef[coef_size] = command[i];
-            coef_size++;
-            if (coef_size >= coef_capacity) {
-                coef_capacity *= 2;
-                char * tmp = NULL;
-                if (!(tmp = (char *)realloc(strcoef, coef_capacity))) {
-                    free(strcoef);
-                    freePolynomial(*poly);
-                    return NO_MEMORY;
-                }
-                strcoef = tmp;
-            }
-            if (isdigit(command[i])) {
-                digit_flag = 1;
-            }
-            if ((command[i + 1] != 'x') && (!isdigit(command[i + 1])) && digit_flag) {
-                if (!(*poly) || max_power < 0) {
-                    if (push_forwardPolynomial(poly, atoi(strcoef), 0) == NO_MEMORY) {
-                        free(strcoef);
-                        free(strpower);
-                        freePolynomial(*poly);
-                        return NO_MEMORY;
-                    }
-                }
-                else {
-                    if (push_backPolynomial(*poly, atoi(strcoef), 0) == NO_MEMORY) {
-                        free(strcoef);
-                        free(strpower);
-                        freePolynomial(*poly);
-                        return NO_MEMORY;
-                    }
-                }
-                free(strcoef);
-                coef_size = 0;
-                coef_capacity = 2;
-                strcoef = (char *)malloc(sizeof(char) * coef_capacity);
-                if (!strcoef) {
-                    return NO_MEMORY;
-                }
-                strcoef[0] = '0';
-                strcoef[1] = '\0';
-                digit_flag = 0;
-                continue;
-            }
-        }
-        if (x_flag) {
-            if (command[i + 1] != '^') {
-                power = 1;
-                done = 1;
-            }
-            if (!done) {
-                i++;
-                i++;
-                while (isdigit(command[i])) {
-                    strpower[power_size] = command[i];
-                    power_size++;
-                    if (power_size >= power_capacity) {
-                        power_capacity *= 2;
-                        char * tmp = NULL;
-                        if (!(tmp = (char *)realloc(strpower, power_capacity))) {
-                            free(strpower);
-                            free(strcoef);
-                            freePolynomial(*poly);
-                            return NO_MEMORY;
-                        }
-                        strpower = tmp;
-                    }
-                    i++;
-                }
-                i--;
-                done = 1;
-                strpower[power_size] = '\0';
-                power = atoi(strpower);
-                free(strpower);
-                char * strpower = (char *)malloc(sizeof(char) * power_capacity);
-                if (!strpower) {
-                    return NO_MEMORY;
-                }
-                strpower[0] = '0';
-                strpower[1] = '\0';
-            }
-        }
-        if (done) {
-            if (max_power < power || max_power == -1 || !(*poly)) {
-                max_power = power;
-                if (push_forwardPolynomial(poly, coef, power) == NO_MEMORY) {
-                    free(strcoef);
-                    free(strpower);
-                    freePolynomial(*poly);
-                    return NO_MEMORY;
-                }
-            }
-            else {
-                if (push_backPolynomial(*poly, coef, power) == NO_MEMORY) {
-                    free(strcoef);
-                    free(strpower);
-                    freePolynomial(*poly);
-                    return NO_MEMORY;
-                }
-            }
-            done = 0;
-            x_flag = 0;
-            power = 0;
-            coef = 0;
-        }
-    }
-    free(strcoef);
-    free(strpower);
+    (*string) = tmp;
     return OK;
 }
 
-status_codes get_command(FILE * stream) {
-    char * command = NULL;
-    Polynomial * summator = NULL;
-    int long_comment = 0;
-    while (getline(&command, &(size_t){0}, stream) != -1) {
-        int argument_count = 1;
-        size_t size = strlen(command);
-        int start_first_polynomial = 0, end_first_polynomial = 0;
-        int start_second_polynomial = 0, end_second_polynomial = 0;
-        int got_command = 0;
-        int comment_end = 0, comment_start = 0, end_command = 0;
-        int short_comment_start = 0;
-        for (int i = 0; i < size; i++) {
-            if (command[i] == '(') {
-                if (command[i + 1] == ')') {
-                    argument_count = 0;
-                    break;
-                }
-                start_first_polynomial = i + 1;
-            }
-            if (command[i] == ',') {
-                argument_count = 2;
-                end_first_polynomial = i;
-                start_second_polynomial = i + 1;
-            }
-            if (command[i] == ')') {
-                if (argument_count == 2) {
-                    end_second_polynomial = i;
-                }
-                else {
-                    end_first_polynomial = i;
-                }
-            }
-            if (command[i] == ';') {
-                end_command = i;
-            }
-            if (command[i] == '%') {
-                short_comment_start = i;
-            }
-            if (command[i] == '[') {
-                if (long_comment) {
-                    free(command);
-                    return INVALID_PARAMETER;
-                }
-                long_comment++;
-                comment_start = i;
-
-            }
-            if (command[i] == ']') {
-                long_comment--;
-                comment_end = i;
-            }
-        }
-        if ((end_command > comment_start && end_command < comment_end) || (end_command > short_comment_start && (short_comment_start != 0))) {
-            free(command);
-            command = NULL;
-            continue;
-        }
-        Polynomial * first = NULL;
-        Polynomial * second = NULL;
-        if (get_polynomial(&first, start_first_polynomial, end_first_polynomial, command) == NO_MEMORY) {
-            freePolynomial(second);
-            free(command);
-            freePolynomial(summator);
+status_codes addString(char **string, size_t *size, size_t *capacity, const char symbol) {
+    (*string)[(*size)] = symbol;
+    (*size)++;
+    if ((*size) >= (*capacity)) {
+        (*capacity) *= 2;
+        char *tmp = NULL;
+        if (!(tmp = (char *)realloc((*string), sizeof(char) * (*capacity)))) {
+            free(*string);
             return NO_MEMORY;
         }
-        if (argument_count == 2) {
-            if (get_polynomial(&second, start_second_polynomial, end_second_polynomial, command) == NO_MEMORY) {
-                freePolynomial(first);
-                free(command);
+        (*string) = tmp;
+    }
+    return OK;
+}
+
+status_codes addPolynomialNode(char **number, size_t *number_size, size_t *number_capacity, Polynomial **poly, int *part_flag, int coefficient, int power, const char symbol) {
+    if ((*part_flag) == 0) {
+        if (!(*number_size)) {
+            return addString(number, number_size, number_capacity, symbol);
+        }
+        (*number)[(*number_size)] = '\0';
+        coefficient = atoi(*number);
+        if (!int_validation(*number)) {
+            coefficient = ((*number)[0] == '-') ? -1 : 1;
+        }
+        power = 0;
+        if (!(*poly)) {
+            if (push_forwardPolynomial(poly, coefficient, power) == NO_MEMORY) {
+                free(*number);
                 return NO_MEMORY;
             }
         }
-        if (command[0] == 'A' && command[1] == 'd' && command[2] == 'd') {
-            if (argument_count == 1) {
-                Polynomial * tmp = NULL;
-                if (copyPolynomial(&tmp, summator) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(tmp);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                freePolynomial(summator);
-                summator = NULL;
-                if (add(&summator, tmp, first) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(tmp);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                freePolynomial(tmp);
-                printPolynomial(summator, 1);
-            }
-            else if (argument_count == 2) {
-                freePolynomial(summator);
-                summator = NULL;
-                if (add(&summator, first, second) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                printPolynomial(summator, 1);
-            }
+        else if (push_backPolynomial(*poly, coefficient, power) == NO_MEMORY)  {
+            free(*number);
+            return NO_MEMORY;
         }
-        else if (command[0] == 'S' && command[1] == 'u' && command[2] == 'b') {
-            if (argument_count == 1) {
-                Polynomial * tmp = NULL;
-                if (copyPolynomial(&tmp, summator) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(tmp);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                //printPolynomial(tmp, 1);
-                //printPolynomial(first, 1);
-                freePolynomial(summator);
-                summator = NULL;
-                if (sub(&summator, tmp, first) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(tmp);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                freePolynomial(tmp);
-                printPolynomial(summator, 1);
-            }
-            else if (argument_count == 2) {
-                freePolynomial(summator);
-                summator = NULL;
-                if (sub(&summator, first, second) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                printPolynomial(summator, 1);
-            }
+        if (deleteString(number, number_size, number_capacity) == NO_MEMORY) {
+            return NO_MEMORY;
         }
-        else if (command[0] == 'M' && command[1] == 'u' && command[2] == 'l' && command[3] == 't') {
-            if (argument_count == 1) {
-                Polynomial * tmp = NULL;
-                if (copyPolynomial(&tmp, summator) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(tmp);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                freePolynomial(summator);
-                summator = NULL;
-                if (mult(&summator, tmp, first) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(tmp);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                freePolynomial(tmp);
-                printPolynomial(summator, 1);
-            }
-            else if (argument_count == 2) {
-                freePolynomial(summator);
-                summator = NULL;
-                if (mult(&summator, first, second) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                printPolynomial(summator, 1);
-            }
-        }
-        else if (command[0] == 'D' && command[1] == 'i' && command[2] == 'v') {
-            if (argument_count == 1) {
-                Polynomial * tmp = NULL;
-                if (copyPolynomial(&tmp, summator) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(tmp);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                freePolynomial(summator);
-                summator = NULL;
-                Polynomial * no_use = NULL;
-                if (!tmp) {
-                    printPolynomial(summator, 1);
-                    continue;
-                }
-                if (copyPolynomial(&no_use, second) == NO_MEMORY) {
-                    return NO_MEMORY;
-                }
-                int val_flag = 0;
-                while (no_use) {
-                    if (no_use->coefficient != 0) {
-                        val_flag = 1;
-                        break;
-                    }
-                    no_use = no_use->next; 
-                }
-                if (!val_flag) {
-                    printf("can't divide by zero\n");
-                    continue;
-                }
-                if (divmod(&summator, &no_use, tmp, first) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(tmp);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                freePolynomial(tmp);
-                freePolynomial(no_use);
-                printPolynomial(summator, 1);
-            }
-            else if (argument_count == 2) {
-                freePolynomial(summator);
-                summator = NULL;
-                Polynomial * no_use = NULL;
-                if (copyPolynomial(&no_use, second) == NO_MEMORY) {
-                    return NO_MEMORY;
-                }
-                int val_flag = 0;
-                while (no_use) {
-                    if (no_use->coefficient != 0) {
-                        val_flag = 1;
-                        break;
-                    }
-                    no_use = no_use->next; 
-                }
-                if (!val_flag) {
-                    printf("can't divide by zero\n");
-                    continue;
-                }
-                if (divmod(&summator, &no_use, first, second) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                freePolynomial(no_use);
-                printPolynomial(summator, 1);
-            }
-        }
-        else if (command[0] == 'M' && command[1] == 'o' && command[2] == 'd') {
-            if (argument_count == 1) {
-                Polynomial * tmp = NULL;
-                if (copyPolynomial(&tmp, summator) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(tmp);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                freePolynomial(summator);
-                summator = NULL;
-                Polynomial * no_use = NULL;
-                if (!tmp) {
-                    printPolynomial(summator, 1);
-                    continue;
-                }
-                if (copyPolynomial(&no_use, first) == NO_MEMORY) {
-                    return NO_MEMORY;
-                }
-                int val_flag = 0;
-                while (no_use) {
-                    if (no_use->coefficient != 0) {
-                        val_flag = 1;
-                        break;
-                    }
-                    no_use = no_use->next; 
-                }
-                if (!val_flag) {
-                    printf("can't divide by zero\n");
-                    continue;
-                }
-                if (divmod(&no_use, &summator, tmp, first) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(tmp);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                freePolynomial(tmp);
-                freePolynomial(no_use);
-                printPolynomial(summator, 1);
-            }
-            else if (argument_count == 2) {
-                freePolynomial(summator);
-                summator = NULL;
-                Polynomial * no_use = NULL;
-                if (copyPolynomial(&no_use, second) == NO_MEMORY) {
-                    return NO_MEMORY;
-                }
-                int val_flag = 0;
-                while (no_use) {
-                    if (no_use->coefficient != 0) {
-                        val_flag = 1;
-                        break;
-                    }
-                    no_use = no_use->next; 
-                }
-                if (!val_flag) {
-                    printf("can't divide by zero\n");
-                    continue;
-                }
-                if (divmod(&no_use, &summator, first, second) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                freePolynomial(no_use);
-                printPolynomial(summator, 1);
-            }
-        }
-        else if ((command[0] == 'E' && command[1] == 'v' && command[2] == 'a' && command[3] == 'l') ||
-        (command[0] == 'C' && command[1] == 'm' && command[2] == 'p' && command[3] == 's')) {
-            if (argument_count == 1) {
-                Polynomial * tmp = NULL;
-                if (copyPolynomial(&tmp, summator) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(tmp);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                freePolynomial(summator);
-                summator = NULL;
-                if (cmps(&summator, tmp, first) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(tmp);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                freePolynomial(tmp);
-                printPolynomial(summator, 1);
-            }
-            else if (argument_count == 2) {
-                freePolynomial(summator);
-                summator = NULL;
-                if (cmps(&summator, first, second) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-                printPolynomial(summator, 1);
-            }
-        }
-        else if (command[0] == 'D' && command[1] == 'i' && command[2] == 'f' && command[3] == 'f') {
-            if (argument_count == 0) {
-                diff(summator);
-                printPolynomial(summator, 1);
-            }
-            else {
-                freePolynomial(summator);
-                summator = NULL;
-                diff(first);
-                printPolynomial(first, 1);
-                if (copyPolynomial(&summator, first) == NO_MEMORY) {
-                    freePolynomial(summator);
-                    freePolynomial(first);
-                    freePolynomial(second);
-                    free(command);
-                    return NO_MEMORY;
-                }
-            }
-        }
-        freePolynomial(first);
-        freePolynomial(second);
-        free(command);
     }
+    else {
+        (*part_flag) = 0;
+        (*number)[(*number_size)] = '\0';
+        power = atoi(*number);
+        if (!(*number_size)) {
+            power = 1;
+        }
+        if (!(*poly) || (*poly)->power < power) {
+            if (push_forwardPolynomial(poly, coefficient, power) == NO_MEMORY) {
+                free(*number);
+                return NO_MEMORY;
+            }
+        }
+        else if (push_backPolynomial(*poly, coefficient, power) == NO_MEMORY)  {
+            free(*number);
+            return NO_MEMORY;
+        }
+        if (deleteString(number, number_size, number_capacity) == NO_MEMORY) {
+            return NO_MEMORY;
+        }
+    }
+    return OK;
+}
+
+status_codes getPolynomial(const char *string, Polynomial **poly) {
+    size_t string_size = strlen(string);
+    if (string[string_size - 1] == '+' || string[string_size - 1] == '-') {
+        return INVALID_PARAMETER;
+    }
+    size_t number_size = 0;
+    size_t number_capacity = 2;
+    char *number = (char *)malloc(sizeof(char) * number_capacity);
+    if (!number) {
+        return NO_MEMORY;
+    }
+    int coefficient = 0;
+    int power = 0;
+    int part_flag = 0;
+    for (int i = 0; i < string_size; i++) {
+        if (string[i] == '^') {
+            if (string[i - 1] != 'x' || string[i + 1] == '-') {
+                free(number);
+                return INVALID_PARAMETER;
+            }
+            continue;
+        }
+        if (string[i] == 'x') {
+            number[number_size] = '\0';
+            coefficient = atoi(number);
+            if (!int_validation(number)) {
+                coefficient = (number[0] == '-') ? -1 : 1;
+            }
+            if (string[i + 1] != '^' && (i + 1) < string_size && string[i + 1] != '+' && string[i + 1] != '-') {
+                free(number);
+                return INVALID_PARAMETER;
+            }
+            if (deleteString(&number, &number_size, &number_capacity) == NO_MEMORY) {
+                return NO_MEMORY;
+            }
+            part_flag = 1;
+            continue;
+        }
+        if ((string[i] == '-' || string[i] == '+')) {
+            if (string[i + 1] == '+' || string[i + 1] == '-') {
+                free(number);
+                return INVALID_PARAMETER;
+            }
+            if (addPolynomialNode(&number, &number_size, &number_capacity, poly, &part_flag, coefficient, power, string[i]) == NO_MEMORY) {
+                return NO_MEMORY;
+            }
+        }
+        else if (!isdigit(string[i])) {
+            free(number);
+            return INVALID_PARAMETER;
+        }
+        if (addString(&number, &number_size, &number_capacity, string[i]) == NO_MEMORY) {
+            return NO_MEMORY;
+        }
+
+    }
+    if (addPolynomialNode(&number, &number_size, &number_capacity, poly, &part_flag, coefficient, power, 0) == NO_MEMORY) {
+        return NO_MEMORY;
+    }
+    free(number);
+    return OK;
+}
+
+status_codes processDiff(char *token, const char *separators, Polynomial **summator) {
+    token = strtok(NULL, separators);
+    if (!token) {
+        diff(*summator);
+        printPolynomial(*summator, 1);
+        return OK;
+    }
+    char polynomial[BUFSIZ];
+    strcpy(polynomial, token);
+    Polynomial *poly = NULL;
+    status_codes status = getPolynomial(polynomial, &poly);
+    if (status != OK) {
+        freePolynomial(poly);
+        return status;
+    }
+    diff(poly);
+    freePolynomial(*summator);
+    (*summator) = NULL;
+    status = copyPolynomial(summator, poly);
+    printPolynomial(*summator, 1);
+    free(poly);
+    return status;
+}
+
+status_codes processEval(char *token, const char *separators, Polynomial **summator) {
+    token = strtok(NULL, separators);
+    if (!token) {
+        return INVALID_PARAMETER;
+    }
+    double result = 0;
+    char first_argument[BUFSIZ];
+    strcpy(first_argument, token);
+    token = strtok(NULL, separators);
+    if (!token) {
+        if (!double_validation(first_argument)) {
+            return INVALID_PARAMETER;
+        }
+        double arg = atof(first_argument);
+        eval(&result, *summator, arg);
+        printf("%.3f\n", result);
+        return OK;
+    }
+    if (!double_validation(token)) {
+        return INVALID_PARAMETER;
+    }
+    Polynomial *poly = NULL;
+    status_codes status = getPolynomial(first_argument, &poly);
+    if (status != OK) {
+        freePolynomial(poly);
+        return status;
+    }
+    eval(&result, poly, atof(token));
+    printf("%.3f\n", result);
+    freePolynomial(poly);
+    return OK;
+}
+
+int command_validation(const char *command) {
+    size_t command_size = strlen(command);
+    int bracket_level = 0;
+    for (int i = 0; i < command_size; i++) {
+        if (command[i] == '(') {
+            bracket_level++;
+            if (command[i + 1] == ',' || bracket_level > 1) {
+                return 0;
+            }
+        }
+        if (command[i] == ')') {
+            bracket_level--;
+        }
+    }
+    return !bracket_level;
+}
+
+status_codes processCommand(char *command, Polynomial **summator) {
+    if (!command_validation(command)) {
+        return INVALID_PARAMETER;
+    }
+    int summator_flag = 0;
+    const char *separators = "(),";
+    char *token = strtok(command, separators);
+    if (!token) {
+        return INVALID_PARAMETER;
+    }
+    if (strcmp(token, "Diff") == 0) {
+        return processDiff(token, separators, summator);
+    }
+    if (strcmp(token, "Eval") == 0) {
+        return processEval(token, separators, summator);
+    }
+    char command_name[128];
+    strcpy(command_name, token);
+    token = strtok(NULL, separators);
+    if (!token) {
+        return INVALID_PARAMETER;
+    }
+    char first_polynomial[BUFSIZ];
+    strcpy(first_polynomial, token);
+    token = strtok(NULL, separators);
+    if (!token) {
+        summator_flag = 1;
+    }
+    char second_polynomial[BUFSIZ];
+    Polynomial *first = NULL;
+    Polynomial *second = NULL;
+    status_codes status;
+    if (!summator_flag) {
+        strcpy(second_polynomial, token);
+        status = getPolynomial(first_polynomial, &first);
+        if (status != OK) {
+            freePolynomial(first);
+            freePolynomial(second);
+            return status;
+        }
+        status = getPolynomial(second_polynomial, &second);
+        if (status != OK) {
+            freePolynomial(first);
+            freePolynomial(second);
+            return status;
+        }
+    }
+    else {
+        if (copyPolynomial(&first, *summator) == NO_MEMORY) {
+            freePolynomial(first);
+            freePolynomial(second);
+            return NO_MEMORY;
+        }
+        freePolynomial(*summator);
+        (*summator) = NULL;
+        status = getPolynomial(first_polynomial, &second);
+        if (status != OK) {
+            freePolynomial(first);
+            freePolynomial(second);
+            return status;
+        }
+    }
+    Polynomial *no_use = NULL;
+    if (strcmp(command_name, "Add") == 0) {
+        status = add(summator, first, second);
+    }
+    else if (strcmp(command_name, "Sub") == 0) {
+        status = sub(summator, first, second);
+    }
+    else if (strcmp(command_name, "Mult") == 0) {
+        status = mult(summator, first, second);
+    }
+    else if (strcmp(command_name, "Div") == 0) {
+        if (isZero(second)) {
+            freePolynomial(first);
+            freePolynomial(second);
+            return INVALID_PARAMETER;
+        }
+        if (isZero(first)) {
+            freePolynomial(first);
+            freePolynomial(second);
+            freePolynomial(*summator);
+            (*summator) = NULL;
+            printPolynomial(*summator, 1);
+            return OK;
+        }
+        status = divmod(summator, &no_use, first, second);
+        freePolynomial(no_use);
+    }
+    else if (strcmp(command_name, "Mod") == 0) {
+        if (isZero(second)) {
+            freePolynomial(first);
+            freePolynomial(second);
+            return INVALID_PARAMETER;
+        }
+        if (isZero(first)) {
+            freePolynomial(first);
+            freePolynomial(second);
+            freePolynomial(*summator);
+            (*summator) = NULL;
+            printPolynomial(*summator, 1);
+            return OK;
+        }
+        status = divmod(&no_use, summator, first, second);
+        freePolynomial(no_use);
+    }
+    else if (strcmp(command_name, "Cmps") == 0) {
+        status = cmps(summator, first, second);
+    }
+    else {
+        status = INVALID_PARAMETER;
+    }
+    freePolynomial(first);
+    freePolynomial(second);
+    printPolynomial(*summator, 1);
+    return status;
+}
+
+status_codes getCommand(FILE *stream) {
+    size_t command_size = 0;
+    size_t command_capacity = 2;
+    char *command = (char *)malloc(sizeof(char) * command_capacity);
+    if (!command) {
+        return NO_MEMORY;
+    }
+    Polynomial *summator = NULL;
+    char symbol = fgetc(stream);
+    int comment_level = 0;
+    int short_comment = 0;
+    while (symbol != EOF) {
+        if (symbol == '[') {
+            comment_level++;
+        }
+        else if (symbol == ']') {
+            comment_level--;
+            if (comment_level < 0) {
+                free(command);
+                freePolynomial(summator);
+                return INVALID_PARAMETER;
+            }
+        }
+        if (symbol == '%') {
+            short_comment = 1;
+        }
+        else if (symbol == '\n') {
+            short_comment = 0;
+        }
+        if (comment_level & 1 || short_comment == 1 || symbol == '[' || symbol == ']' || symbol == '%' || symbol == '\n' || symbol == ' ' || symbol == '\t') {
+            symbol = fgetc(stream);
+            continue;
+        }
+        if (symbol == ';') {
+            command[command_size] = '\0';
+            status_codes status = processCommand(command, &summator);
+            if (status != OK) {
+                free(command);
+                freePolynomial(summator);
+                return status;
+            }
+            if (deleteString(&command, &command_size, &command_capacity) == NO_MEMORY) {
+                freePolynomial(summator);
+                return NO_MEMORY;
+            }
+            symbol = fgetc(stream);
+            continue;
+        }
+        command[command_size] = symbol;
+        command_size++;
+        if (command_size >= command_capacity) {
+            command_capacity *= 2;
+            char *tmp = NULL;
+            if (!(tmp = (char *)realloc(command, sizeof(char) * command_capacity))) {
+                free(command);
+                freePolynomial(summator);
+                return NO_MEMORY;
+            }
+            command = tmp;
+        }
+        symbol = fgetc(stream);
+    }
+    free(command);
     freePolynomial(summator);
-    if (command) {
-        free(command);
+    if (comment_level != 0) {
+        return INVALID_PARAMETER;
     }
     return OK;
 }
@@ -571,11 +447,16 @@ int main(int argc, char * argv[]) {
         printf("Wrong flag\n");
         return -1;
     }
-    FILE * file = fopen(argv[1], "r");
-    switch (get_command(file)) {
+    FILE *file = fopen(argv[1], "r");
+    switch (getCommand(file)) {
         case OK: break;
         case NO_MEMORY:
             fclose(file);
+            printf("No memory\n");
+            return -1;
+        case INVALID_PARAMETER:
+            fclose(file);
+            printf("Invalid parameter detected\n");
             return -1;
     }
     fclose(file);

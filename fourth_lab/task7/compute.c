@@ -1,20 +1,7 @@
 #include "compute.h"
 
-int binary_pow(int base, int power) {
-    if (power == 0) {
-        return 1;
-    }
-    if (power % 2 == 1) {
-        return binary_pow(base, power - 1) * base;
-    }
-    else {
-        int tmp = binary_pow(base, power / 2);
-        return tmp * tmp;
-    }
-}
-
 int isOperator(const char symbol) {
-    return ((symbol == '(') || (symbol == ')') || (symbol == '+') || (symbol == '*') || (symbol == '/') || (symbol == '-') ||(symbol == '%') || (symbol == '^') || (symbol == '~'));
+    return ((symbol == '(') || (symbol == ')') || (symbol == '+') || (symbol == '-') || (symbol == '/') || (symbol == '*') || (symbol == '%'));
 }
 
 int getPriority(const char operator) {
@@ -31,8 +18,6 @@ int getPriority(const char operator) {
             return 2;
         case '%':
             return 2;
-        case '^':
-            return 3;
         case '~':
             return 2;
         default:
@@ -40,7 +25,7 @@ int getPriority(const char operator) {
     }
 }
 
-status_codes to_postfix(char **postfix, const char *infix) {
+status_codes getPostfix(char **postfix, const char *infix) {
     size_t infix_size = strlen(infix);
     (*postfix) = (char *)malloc(sizeof(char) * infix_size);
     if (!(*postfix)) {
@@ -49,23 +34,20 @@ status_codes to_postfix(char **postfix, const char *infix) {
     size_t postfix_size = 0;
     Stack *operators = NULL;
     int bracket_level = 0;
-    int digit_in_bracket = 0;
+    int val_in_bracket = 0;
     for (int i = 0; i < infix_size; i++) {
-        if (infix[i] == ' ' || infix[i] == '\t' || infix[i] == '\n') {
-            continue;
-        }
         if (!isOperator(infix[i])) {
             (*postfix)[postfix_size] = infix[i];
             postfix_size++;
-            if (isOperator(infix[i + 1]) || infix[i + 1] == ' ' || infix[i + 1] == '\t') {
+            if (isOperator(infix[i + 1])) {
                 (*postfix)[postfix_size] = ' ';
                 postfix_size++;
             }
             if (bracket_level) {
-                digit_in_bracket = 1;
+                val_in_bracket = 1;
             }
             else {
-                digit_in_bracket = 0;
+                val_in_bracket = 1;
             }
         }
         else if (infix[i] == ')') {
@@ -76,7 +58,7 @@ status_codes to_postfix(char **postfix, const char *infix) {
                 if (popStack(&operators, &from_stack) == INVALID_PARAMETER) {
                     free(*postfix);
                     freeStack(operators);
-                    return INVALID_BRACKET;
+                    return UNEQUAL_BRACKET;
                 }
                 if (from_stack == '(') {
                     break;
@@ -85,7 +67,7 @@ status_codes to_postfix(char **postfix, const char *infix) {
                 (*postfix)[postfix_size] = from_stack;
                 postfix_size++;
             }
-            if (!got_an_operator && !digit_in_bracket) {
+            if (!got_an_operator && !val_in_bracket) {
                 free(*postfix);
                 freeStack(operators);
                 return EMPTY_BRACKET;
@@ -108,7 +90,7 @@ status_codes to_postfix(char **postfix, const char *infix) {
                     if (isOperator(infix[j]) && infix[j] != ')') {
                         break;
                     }
-                    if (isdigit(infix[j])) {
+                    if (isdigit(infix[j]) || isalpha(infix[j])) {
                         binary = 1;
                         break;
                     }
@@ -139,77 +121,96 @@ status_codes to_postfix(char **postfix, const char *infix) {
         if (from_stack == '(') {
             freeStack(operators);
             free(*postfix);
-            return INVALID_BRACKET;
+            return UNEQUAL_BRACKET;
         }
         (*postfix)[postfix_size] = from_stack;
         postfix_size++;
-
     }
     (*postfix)[postfix_size] = '\0';
-    freeStack(operators);
     return OK;
 }
 
-status_codes postfix_compute(long long *result, const char *postfix) {
+status_codes computePostfix(long long *result, const char *postfix, ArrayCell array, size_t array_size) {
     Stack *operands = NULL;
     size_t postfix_size = strlen(postfix);
     if (!postfix || !postfix_size) {
         return ZERO_SIZE;
     }
-    size_t number_size = 0;
-    size_t number_capacity = 2;
-    char *number = (char *)malloc(sizeof(char) * number_capacity);
-    if (!number) {
+    size_t var_size = 0;
+    size_t var_capacity = 2;
+    char *var = (char *)malloc(sizeof(char) * var_capacity);
+    if (!var) {
         return NO_MEMORY;
     }
     for (int i = 0; i < postfix_size; i++) {
-        if (postfix[i] == ' ' || postfix[i] == '\t' || postfix[i] == '\n') {
+        if (postfix[i] == ' ') {
             continue;
         }
-        if (!isdigit(postfix[i]) && !isOperator(postfix[i])) {
-            free(number);
+        if (!isdigit(postfix[i]) && !isalpha(postfix[i]) && !isOperator(postfix[i]) && postfix[i] != ' ') {
+            
+            free(var);
             freeStack(operands);
-            return NOT_DIGIT_OR_OPERATOR;
+            return INVALID_SYMBOL;
         }
-        if (isdigit(postfix[i])) {
-            while (i < postfix_size && (isdigit(postfix[i]))) {
-                number[number_size] = postfix[i];
-                number_size++;
-                if (number_size >= number_capacity) {
-                    number_capacity *= 2;
+        if (isdigit(postfix[i]) || isalpha(postfix[i])) {
+            while (i < postfix_size && (isdigit(postfix[i]) || isalpha(postfix[i]))) {
+                var[var_size] = postfix[i];
+                var_size++;
+                if (var_size >= var_capacity) {
+                    var_capacity *= 2;
                     char *tmp = NULL;
-                    if (!(tmp = (char *)realloc(number, sizeof(char) * number_capacity))) {
-                        free(number);
+                    if (!(tmp = (char *)realloc(var, sizeof(char) * var_capacity))) {
+                        free(var);
                         freeStack(operands);
                         return NO_MEMORY;
                     }
-                    number = tmp;
+                    var = tmp;
                 }
                 i++;
             }
             i--;
-            number[number_size] = '\0';
-            if (pushStack(&operands, atoll(number)) == NO_MEMORY) {
-                free(number);
-                freeStack(operands);
-                return NO_MEMORY;
+            var[var_size] = '\0';
+            if (int_validation(var)) {
+                if (pushStack(&operands, atoll(var)) == NO_MEMORY) {
+                    free(var);
+                    freeStack(operands);
+                    return NO_MEMORY;
+                }
+            }
+            else {
+                if (!name_validation(var)) {
+                    free(var);
+                    freeStack(operands);
+                    return INVALID_NAME;
+                }
+                int index = binarySearch(array, array_size, var);
+                if (index == -1) {
+                    free(var);
+                    freeStack(operands);
+                    return UNINITIALIZED_VALUE;
+                }
+                if (pushStack(&operands, array[index]->value) == NO_MEMORY) {
+                    free(var);
+                    freeStack(operands);
+                    return NO_MEMORY;
+                }
             }
             char *tmp = NULL;
-            number_size = 0;
-            number_capacity = 2;
-            if (!(tmp = (char *)realloc(number, sizeof(char) * number_capacity))) {
-                free(number);
+            var_size = 0;
+            var_capacity = 2;
+            if (!(tmp = (char *)realloc(var, sizeof(char) * var_capacity))) {
+                free(var);
                 freeStack(operands);
                 return NO_MEMORY;
             }
-            number = tmp;
+            var = tmp;
         }
         else {
             long long first_value, second_value;
             if (popStack(&operands, &first_value) == INVALID_PARAMETER) {
-                free(number);
+                free(var);
                 freeStack(operands);
-                return UNUSED_DIGITS_OR_OPERATORS;
+                return UNUSED_VARS_OR_OPERATORS;
             }
             long long res = 0;
             if (postfix[i] == '~') {
@@ -217,9 +218,9 @@ status_codes postfix_compute(long long *result, const char *postfix) {
             }
             else {
                 if (popStack(&operands, &second_value) == INVALID_PARAMETER) {
-                    free(number);
+                    free(var);
                     freeStack(operands);
-                    return UNUSED_DIGITS_OR_OPERATORS;
+                    return UNUSED_VARS_OR_OPERATORS;
                 }
                 switch (postfix[i]) {
                     case '~':
@@ -235,7 +236,7 @@ status_codes postfix_compute(long long *result, const char *postfix) {
                         break;
                     case '/':
                         if (!first_value) {
-                            free(number);
+                            free(var);
                             freeStack(operands);
                             return DIVIDE_BY_ZERO;
                         }
@@ -243,54 +244,40 @@ status_codes postfix_compute(long long *result, const char *postfix) {
                         break;
                     case '%':
                         if (!first_value) {
-                            free(number);
+                            free(var);
                             freeStack(operands);
                             return DIVIDE_BY_ZERO;
                         }
                         if (first_value < 0 || second_value < 0) {
-                            free(number);
+                            free(var);
                             freeStack(operands);
                             return NEGATIVE_MOD;
                         }
                         res = second_value % first_value;
                         break;
-                    case '^':
-                        if (first_value < 0) {
-                            free(number);
-                            freeStack(operands);
-                            return NEGATIVE_POWER;
-                        }
-                        if (!first_value && !second_value) {
-                            free(number);
-                            freeStack(operands);
-                            return NEGATIVE_POWER;
-                        }
-                        res = binary_pow(second_value, first_value);
-                        break;
                     default:
-                        free(number);
+                        free(var);
                         freeStack(operands);
-                        return INVALID_PARAMETER;
+                        return INVALID_SYMBOL;
                 }
             }
             if (pushStack(&operands, res) == NO_MEMORY) {
-                free(number);
+                free(var);
                 freeStack(operands);
                 return NO_MEMORY;
             }
         }
     }
     if (popStack(&operands, result) == INVALID_PARAMETER) {
-        free(number);
+        free(var);
         freeStack(operands);
-        return UNUSED_DIGITS_OR_OPERATORS;
+        return UNUSED_VARS_OR_OPERATORS;
     }
     if (operands) {
         freeStack(operands);
-        free(number);
-        return UNUSED_DIGITS_OR_OPERATORS;
+        free(var);
+        return UNUSED_VARS_OR_OPERATORS;
     }
-    free(number);
+    free(var);
     return OK;
 }
-

@@ -27,6 +27,9 @@ void errorProcessing(const status_codes error, FILE *stream, const char *infix, 
         case UNUSED_DIGITS_OR_OPERATORS:
             fprintf(stream, "Unused digits or operators\n");
             return;
+        case EMPTY_BRACKET:
+            fprintf(stream, "Empty in-bracket space detected\n");
+            return;
     }
 }
 
@@ -59,7 +62,8 @@ status_codes processFiles(const int files_quantity, char *filenames[]) {
             char *token = strtok(infix_copy, "\n");
             char *postfix = NULL;
             status_codes status = to_postfix(&postfix, infix);
-            if (status == INVALID_BRACKET) {
+            printf("%s\n", postfix);
+            if (status != OK && status != NO_MEMORY) {
                 if (!stream_error) {
                     stream_error = fopen(filename_error, "w");
                     if (!stream_error) {
@@ -80,7 +84,6 @@ status_codes processFiles(const int files_quantity, char *filenames[]) {
                 fclose(stream);
                 return NO_MEMORY;
             }
-            
             long long compute = 0;
             status = postfix_compute(&compute, postfix);
             if (status != OK) {

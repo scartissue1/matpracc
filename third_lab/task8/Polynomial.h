@@ -40,10 +40,12 @@ status_codes divmod(Polynomial ** div_result, Polynomial ** mod_result, Polynomi
 
 double binary_pow(double base, int power);
 
-status_codes eval(int * result, Polynomial * poly, const double value);
+void eval(double *result, Polynomial * poly, const double value);
 
 status_codes cmps(Polynomial ** result, Polynomial * first, Polynomial * second);
 
-status_codes diff(Polynomial * poly);
+void diff(Polynomial * poly);
+
+int isZero(Polynomial *poly);
 
 #endif

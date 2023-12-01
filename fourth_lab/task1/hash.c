@@ -87,12 +87,39 @@ int checkTable(HashTable *table) {
     return 0;
 }
 
+status_codes checkList(int *change_result, List *root, HashItem *ptr) {
+    if (!root || (*change_result)) {
+        return OK;
+    }
+    char *curr_key = root->value->key;
+    char *curr_value = root->value->value;
+    if (strcmp(curr_key, ptr->key) == 0) {
+        size_t value_size = strlen(ptr->value);
+        char *tmp = NULL;
+        if (!(tmp = (char *)realloc(curr_value, sizeof(char) * value_size))) {
+            return NO_MEMORY;
+        }
+        curr_value = tmp;
+        memcpy(curr_value, ptr->value, value_size);
+        (*change_result) = 1;
+        return OK;
+    }
+    return checkList(change_result, root->next, ptr); 
+}
+
 status_codes insertTable(HashTable *table, const char *key, const char *value, int hash_flag, int key_hash) {
     HashItem *new = NULL;
     if (createItem(&new, key, value, hash_flag, key_hash, table->hash_function) == NO_MEMORY) {
         return NO_MEMORY;
     }
     int index = new->key_hash % table->hashsize;
+    int check_result = 0;
+    if (checkList(&check_result, table->data[index], new) == NO_MEMORY) {
+        return NO_MEMORY;
+    }
+    if (check_result) {
+        return OK;
+    }
     if (addList(&table->data[index], new) == NO_MEMORY) {
         return NO_MEMORY;
     }

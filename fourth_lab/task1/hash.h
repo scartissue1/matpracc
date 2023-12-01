@@ -25,6 +25,8 @@ void freeTable(HashTable *data);
 
 int checkTable(HashTable *table);
 
+status_codes checkList(int *change_result, List *root, HashItem *ptr);
+
 status_codes insertTable(HashTable *table, const char *key, const char *value, int hash_flag, int key_hash);
 
 char *findTable(HashTable *table, const char *key);

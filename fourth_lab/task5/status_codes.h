@@ -7,6 +7,7 @@ typedef enum {
     NO_FILE,
     INVALID_PARAMETER,
     INVALID_BRACKET,
+    EMPTY_BRACKET,
     ZERO_SIZE,
     DIVIDE_BY_ZERO,
     NEGATIVE_MOD,
