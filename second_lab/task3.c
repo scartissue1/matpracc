@@ -59,6 +59,11 @@ int main(int argc, char * argv[]) {
 }
 
 status_codes get_file(founds ** result, int * result_capacity, char * substring, int quantity, ...) {
+    size_t substring_size = _strlen(substring);
+    if (!substring_size) {
+        return ZERO_SIZE;
+    }
+    
     if (quantity < 1 || !substring) return INVALID_PARAMETER;
     (*result_capacity) = 2;
     (*result) = (founds *)malloc(sizeof(founds) * (*result_capacity));
@@ -66,11 +71,6 @@ status_codes get_file(founds ** result, int * result_capacity, char * substring,
         return NO_MEMORY;
     }
     int result_size = 0;
-
-    size_t substring_size = _strlen(substring);
-    if (!substring_size) {
-        return ZERO_SIZE;
-    }
     int tabulation_count = 0;
     for (int i = 0; i < substring_size; i++) {
         if (substring[i] == '\t') {
