@@ -62,7 +62,6 @@ status_codes processFiles(const int files_quantity, char *filenames[]) {
             char *token = strtok(infix_copy, "\n");
             char *postfix = NULL;
             status_codes status = to_postfix(&postfix, infix);
-            printf("%s\n", postfix);
             if (status != OK && status != NO_MEMORY) {
                 if (!stream_error) {
                     stream_error = fopen(filename_error, "w");
