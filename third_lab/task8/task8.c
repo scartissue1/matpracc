@@ -384,10 +384,15 @@ status_codes getCommand(FILE *stream) {
     int comment_level = 0;
     int short_comment = 0;
     while (symbol != EOF) {
-        if (symbol == '[') {
+        if (symbol == '[' && !short_comment) {
             comment_level++;
+            if (comment_level > 1) {
+                free(command);
+                freePolynomial(summator);
+                return INVALID_PARAMETER;
+            }
         }
-        else if (symbol == ']') {
+        else if (symbol == ']' && !short_comment) {
             comment_level--;
             if (comment_level < 0) {
                 free(command);
@@ -395,7 +400,7 @@ status_codes getCommand(FILE *stream) {
                 return INVALID_PARAMETER;
             }
         }
-        if (symbol == '%') {
+        if (symbol == '%' && !comment_level) {
             short_comment = 1;
         }
         else if (symbol == '\n') {

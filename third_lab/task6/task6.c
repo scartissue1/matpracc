@@ -222,12 +222,14 @@ status_codes get_info(pathList ** head, int array_size, char * array[]) {
     return OK;
 }
 
-status_codes find_longest_way(pathList * path, char * max_result, char * min_result, double max, double min) {
+status_codes find_longest_way(pathList * path, char * max_result, char * min_result, double max, double min, const double eps) {
+    if (eps <= 0) {
+        return INVALID_PARAMETER;
+    }
     if (!path) {
         return OK;
     }
     double summ = 0;
-    double eps = 1e-10;
     stopList * copy = NULL;
     if (copy_stopList(&copy, path->value, 0) == NO_MEMORY) {
         return NO_MEMORY;
@@ -249,7 +251,7 @@ status_codes find_longest_way(pathList * path, char * max_result, char * min_res
         strcpy(min_result, copy->value.transport_id);
     }
     free_stopList(copy);
-    find_longest_way(path->next, max_result, min_result, max, min);
+    find_longest_way(path->next, max_result, min_result, max, min, eps);
     return OK;
 }
 
@@ -285,12 +287,14 @@ status_codes find_most_routes(pathList * path, char * most_result, char * min_re
     return OK;
 }
 
-status_codes find_most_route_length(pathList * path, char * max_result, char * min_result, double max, double min) {
+status_codes find_most_route_length(pathList * path, char * max_result, char * min_result, double max, double min, const double eps) {
+    if (eps <= 0) {
+        return INVALID_PARAMETER;
+    }
     if (!path) {
         return OK;
     }
     double summ = 0;
-    double eps = 1e-10;
     double current = 0;
     stopList * copy = NULL;
     if (copy_stopList(&copy, path->value, 0) == NO_MEMORY) {
@@ -319,7 +323,7 @@ status_codes find_most_route_length(pathList * path, char * max_result, char * m
         copy = tmp;
     }
     free_stopList(copy);
-    find_most_route_length(path->next, max_result, min_result, max, min);
+    find_most_route_length(path->next, max_result, min_result, max, min, eps);
     return OK;
 }
 
@@ -394,6 +398,7 @@ void print_menu();
 
 status_codes communicate(pathList * path) {
     print_menu();
+    const double eps = 1e-10;
     while (1) {
         char command[BUFSIZ];
         scanf("%s", command);
@@ -411,7 +416,7 @@ status_codes communicate(pathList * path) {
         else if (strcmp(command, "ovr_length") == 0) {
             char max[128];
             char min[128];
-            if (find_longest_way(path, max, min, -1.0, -1.0) == NO_MEMORY) {
+            if (find_longest_way(path, max, min, -1.0, -1.0, eps) == NO_MEMORY) {
                 return NO_MEMORY;
             }
             printf("Longest way: %s\nShortest way: %s\n", max, min);
@@ -419,7 +424,7 @@ status_codes communicate(pathList * path) {
         else if (strcmp(command, "route_length") == 0) {
             char max[128];
             char min[128];
-            if (find_most_route_length(path, max, min, -1.0, -1.0) == NO_MEMORY) {
+            if (find_most_route_length(path, max, min, -1.0, -1.0, eps) == NO_MEMORY) {
                 return NO_MEMORY;
             }
             printf("Longest way in one route: %s\nShortest way in one route: %s\n", max, min);

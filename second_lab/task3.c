@@ -98,7 +98,6 @@ status_codes get_file(founds ** result, int * result_capacity, char * substring,
             case NO_MEMORY:
                 fclose(file);
                 va_end(files);
-                free(*result);
                 return NO_MEMORY;
         }
         fclose(file);
@@ -131,6 +130,10 @@ status_codes find_overlap(founds ** result, int * result_size, int * result_capa
                 new.row = row_coincedence_index;
                 new.symbol = symbol_coincedence_index;
                 new.filename = (char *)malloc(sizeof(char) * filename_size);
+                if (!new.filename) {
+                    free(*result);
+                    return NO_MEMORY;
+                }
                 memcpy(new.filename, filename, filename_size);
                 (*result)[(*result_size)] = new;
                 (*result_size)++;
