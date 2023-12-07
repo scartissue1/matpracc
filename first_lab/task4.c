@@ -5,33 +5,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-char * num_to_string_in_base (int number, int base) {
-    int num_len = 1, ind = 0;
-    char * str_number = (char *)malloc(sizeof(char) * num_len);
-    while (number > 0) {
-        int remainder = number % base;
-        if (remainder < 10) str_number[ind] = (number % base) + '0';
-        else {
-            char letter_in_hex = remainder + 55;
-            str_number[ind] = letter_in_hex;
-        }
-        number /= base;
-        ind++;
-        num_len++;
-        str_number = (char *)realloc(str_number, num_len);
-    }
-    str_number[num_len - 1] = '\0';
-    int i = 0, j = num_len - 2;
-    while (i < j) {
-        char tmp = str_number[i];
-        str_number[i] = str_number[j];
-        str_number[j] = tmp;
-        i++;
-        j--;
-    }
-    return str_number;
-}
-
 void arabic_number_excluder (FILE * in, FILE * out) {
     char to_check;
     while ((to_check = fgetc(in)) != EOF) {
@@ -46,17 +19,13 @@ void latin_letters_counter (FILE * in, FILE * out) {
     int count = 0;
     while ((to_check = fgetc(in)) != EOF) {
         if (to_check != '\n') {
-            int ascii_to_check = to_check;
-            if ((65 <= ascii_to_check && ascii_to_check <= 90) || (97 <= ascii_to_check && ascii_to_check <= 122)) {
+            if ((65 <= to_check && to_check <= 90) || (97 <= to_check && to_check <= 122)) {
                 count++;
             }
         }
         else {
-            char * char_count = num_to_string_in_base(count, 10);
-            fputs(char_count, out);
-            fputc('\n', out);
+            fprintf(out, "%d\n", count);
             count = 0;
-            free(char_count);
         }
     }
 }
@@ -71,11 +40,8 @@ void not_latin_digit_space_counter (FILE * in, FILE * out) {
             }
         }
         else {
-            char * char_count = num_to_string_in_base(count, 10);
-            fputs(char_count, out);
-            fputc('\n', out);
+            fprintf(out, "%d\n", count);
             count = 0;
-            free(char_count);
         }
     }
 }
@@ -84,10 +50,7 @@ void char_to_hex (FILE * in, FILE * out) {
     char to_check;
     while ((to_check = fgetc(in)) != EOF) {
         if (!isdigit(to_check)) {
-            int ascii_to_check = to_check;
-            char * hex_ascii_to_check = num_to_string_in_base(ascii_to_check, 16);
-            fputs(hex_ascii_to_check, out);
-            free(hex_ascii_to_check);
+            fprintf(out, "%x", to_check);
         }
         else fputc(to_check, out);
     }
