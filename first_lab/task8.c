@@ -4,20 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-long long int pow_int (const int base, const int power) {
-    if (power == 0) {
-        long long int result = 1;
-        return result;
-    }
-    if (power == 1) return base;
-
-    long long int result = base;
-    for (int i = 1; i < power; i++) {
-        result *= base;
-    }
-    return result;
-}
-
 int digits_count (long long int number) {
     int digits_count = 0; 
     while (number != 0) { 
