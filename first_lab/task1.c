@@ -147,7 +147,11 @@ int main(int argc, char* argv[]) {
         int number = atoi(argv[1]);
         if ((argv[2][0] == '-' || argv[2][0] == '/') && argv[2][1] == 'h')  { 
             int result_length = 100 / number;
-            int * multipliers_result = (int*)malloc(sizeof(int) * result_length);                
+            int * multipliers_result = (int*)malloc(sizeof(int) * result_length);
+            if (!multipliers_result) {
+                printf("No memory\n");
+                return -1;
+            }                
             switch (multiple_by(number, multipliers_result, result_length)) {
                 case mbsc_ok: 
                     for (int i = 0; i < result_length; i++) {
@@ -181,6 +185,10 @@ int main(int argc, char* argv[]) {
         else if ((argv[2][0] == '-' || argv[2][0] == '/') && argv[2][1] == 's') {
             int d_count = digits_count(number);
             int * splitter_result = (int*)malloc(sizeof(int) * d_count);
+            if (!splitter_result) {
+                printf("No memory\n");
+                return -1;
+            }
             switch(number_split(number, splitter_result, d_count)) { 
                 case nssc_ok:
                     for (int i = 0; i < d_count; i++) {
@@ -199,8 +207,20 @@ int main(int argc, char* argv[]) {
         }
         else if ((argv[2][0] == '-' || argv[2][0] == '/') && argv[2][1] == 'e')  {
             int ** power_table_result = (int**)malloc(sizeof(int*) * 10);
+            if (!power_table_result) {
+                printf("No memory\n");
+                return -1;
+            }
             for (int i = 0; i < 10; i++) {
                 power_table_result[i] = (int*)malloc(sizeof(int) * number);
+                if (!power_table_result[i]) {
+                    printf("No memory\n");
+                    for (int j = 0; j < i; j++) {
+                        free(power_table_result[j]);
+                    }
+                    free(power_table_result);
+                    return -1;
+                }
             }
             switch (power_table(number, power_table_result)) {
                 case ptsc_ok:

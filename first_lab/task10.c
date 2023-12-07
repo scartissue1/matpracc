@@ -31,8 +31,9 @@ bool num_validity (const char * number, const int number_length, const int base)
 }
 
 long long int from_base_to_int (char * number, int number_size, int base) {
-    if (!number) return 0;
-
+    if (!number) {
+        return 0;
+    }
     int power = 1, sign = 1, sign_flag = 0;
     long long int decimal = 0;
     if (number[0] == '-') {
@@ -40,7 +41,7 @@ long long int from_base_to_int (char * number, int number_size, int base) {
         sign_flag = 1;
     }
     else if (number[0] == '+') sign_flag = 1;
-    for (int i = number_size - 2; i >= sign_flag; i--) {
+    for (int i = number_size - 1; i >= sign_flag; i--) {
         decimal += power * ((isdigit(number[i])) ? number[i] - '0' : number[i] - 'A' + 10);
         power *= base;
     }
@@ -66,42 +67,6 @@ char * from_decimal_to_base (int number, int base) {
     return num_in_base;
 }
 
-enum status_codes {
-    ok,
-    no_memory,
-    wrong_data
-};
-
-enum status_codes get_a_number (FILE * in, char ** number, int * num_size, int base) {
-    if (!in) return wrong_data;
-    int index = 0;
-    *num_size = 1;
-    *number = (char *)malloc(sizeof(char) * (*num_size));
-    if (!(*number)) return no_memory;
-
-    char input = fgetc(in);
-    while (input != '\n' && input != '\t' && input != ' ' && input != EOF) {
-        if (!((*num_size) == 1 && input == '0')) {
-            (*num_size)++;
-            char * tmp = (char *)realloc((*number), sizeof(char) * (*num_size));
-            if (!tmp) {
-                free(*number);
-                *number = NULL;
-                return no_memory;
-            }
-            *number = tmp;
-            (*number)[index] = input;
-            index++;
-        }
-
-        input = fgetc(in);
-
-    }
-    (*number)[index] = '\0';
-    return ok;
-
-}
-
 int main (int argc, char * argv[]) {
     int base;
     printf("Enter the base in [2, 36]:\n");
@@ -111,53 +76,62 @@ int main (int argc, char * argv[]) {
         return -1;
     }
     printf("Enter numbers in that base. All letters should be in uppercase. Type Stop to stop\nWrong numbers will be skipped\n");
-    char * max = (char *)malloc(sizeof(char) * 2);
-    max[0] = '0';
-    max[1] = '\0';
+    char max[BUFSIZ];
     int max_size = 2; 
-    long long int int_max = 0;
-    char * tmp = NULL;
-    char * number = NULL;
-    while (1) {
-        int num_size = 0;
-        enum status_codes status = get_a_number(stdin, &number, &num_size, base);
-        if (status == ok) {
-            if (strcmp(number, "Stop") != 0) {
-                if (num_validity(number, num_size, base)) {
-                    if (fabs(from_base_to_int(number, num_size, base)) > fabs(from_base_to_int(max, max_size, base))) {
-                        tmp = max;
-                        free(tmp);
-                        tmp = NULL;
-                        max = number;
-                        max_size = num_size;
-                        int_max = from_base_to_int(max, max_size, base);
-                    }
+    long long int int_max = -1;
+    char number[BUFSIZ];
+    while (scanf("%s", number)) {
+        if (strcmp(number, "Stop") != 0) {
+            size_t num_size = strlen(number);
+            if (num_validity(number, num_size, base)) {
+                int number_int = from_base_to_int(number, num_size, base);
+                if (number_int > int_max || int_max == -1) {
+                    int_max = number_int;
+                    strcpy(max, number);
                 }
-            } 
-            else break;
-            
+            }
         }
-        else if (status == no_memory) {
-            printf("No memory!\n");
-            return -1;
-        }
-        else if (status == wrong_data) {
-            printf("Smth wrong with stdin\n");
-            return -1;
-        }
-        number = NULL;
+        else break;   
     }
     printf("%s\n", max);
     printf("in 10: %lld\n", int_max);
     if (int_max) {
-        printf("in 9: %s\n", from_decimal_to_base(int_max, 9));
-        printf("in 18: %s\n", from_decimal_to_base(int_max, 18));
-        printf("in 27: %s\n", from_decimal_to_base(int_max, 27));
-        printf("in 36: %s\n", from_decimal_to_base(int_max, 36));
+        char *in_9 = from_decimal_to_base(int_max, 9);
+        if (!in_9) {
+            printf("No memory\n");
+            return -1;
+        }
+        char *in_18 = from_decimal_to_base(int_max, 18);
+        if (!in_18) {
+            free(in_9);
+            printf("No memory\n");
+            return -1;
+        }
+        char *in_27 = from_decimal_to_base(int_max, 27);
+        if (!in_27) {
+            free(in_9);
+            free(in_18);
+            printf("No memory\n");
+            return -1;
+        }
+        char *in_36 = from_decimal_to_base(int_max, 36);
+        if (!in_36) {
+            free(in_9);
+            free(in_18);
+            free(in_27);
+            printf("No memory\n");
+            return -1;
+        }
+        printf("in 9: %s\n", in_9);
+        printf("in_18: %s\n", in_18);
+        printf("in_27: %s\n", in_27);
+        printf("in_36: %s\n", in_36);
+        free(in_9);
+        free(in_18);
+        free(in_27);
+        free(in_36);
     }
     else printf("0 in every base is 0\n");
-    free(max);
-    free(number);
     fflush(stdin);
     return 0;
 }
