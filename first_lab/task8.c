@@ -28,18 +28,11 @@ int digits_count (long long int number) {
 }
 
 long long int from_base_to_int (char * number, int number_length, int base) {
-    int power = 0;
+    int power = 1;
     long long int decimal = 0;
     for (int i = number_length - 2; i >= 0; i--) {
-        int num = 0;
-        if (isdigit(number[i])) {
-            num = number[i] - '0';
-        }
-        else if (isalpha(number[i])) {
-            num = number[i] - 87;
-        }
-        decimal += pow_int(base, power) * num;
-        power++;
+        decimal += power * (isdigit(number[i]) ? number[i] - '0' : number[i] - 'a' + 10);
+        power *= base;
     }
     return decimal;
 }
@@ -148,6 +141,9 @@ int main (int argc, char * argv[]) {
         }
         fclose(in);
         fclose(out);
+    }
+    else {
+        printf("wrong flag\n");
     }
     return 0;
 }
