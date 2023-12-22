@@ -86,11 +86,13 @@ char * in_base_summ(const int base, int quantity, ...) {
         if (!in_base_validation(new_string, base)) {
             printf("Wrong number\n");
             free(summ_string);
+            free(tmp);
             return NULL;
         }
         tmp = summ_string;
         summ_string = summ(summ_string, new_string, _strlen(summ_string), _strlen(new_string), base);
         if (!summ_string) {
+            free(tmp);
             va_end(number);
             return NULL;
         }
@@ -100,6 +102,10 @@ char * in_base_summ(const int base, int quantity, ...) {
     va_end(number);
     tmp = summ_string;
     summ_string = delete_lead_zeros(summ_string, _strlen(summ_string));
+    if (!summ_string) {
+        free(tmp);
+        return NULL;
+    }
     free(tmp);
     return summ_string;
 }
