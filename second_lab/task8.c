@@ -32,6 +32,9 @@ char * delete_lead_zeros(char * string, size_t size) {
     }
     size_t new_size = size - lead_zero_count + 1; 
     char * wo_lead_zeros = (char *)malloc(sizeof(char) * new_size);
+    if (!wo_lead_zeros) {
+        return NULL;
+    }
     for (int i = 0; i < new_size; i++) {
         wo_lead_zeros[i] = string[i + lead_zero_count];
     }
@@ -43,6 +46,10 @@ char * summ(char * string1, char * string2, size_t string1_size, size_t string2_
     int result_size = ((string1_size > string2_size) ? string1_size : string2_size) + 2;
     int result_index = result_size - 1;
     char * result = (char *)malloc(sizeof(char) * result_size);
+    if (!result) {
+        free(string1);
+        return NULL;
+    }
     int index1 = string1_size - 1, index2 = string2_size - 1, _1flag = 1, _2flag = 1;
     while (index1 >= 0 || index2 >= 0) {
         if (index1 < 0) _1flag = 0;
@@ -68,6 +75,9 @@ char * in_base_summ(const int base, int quantity, ...) {
     va_list number;
     va_start(number, quantity);
     char * summ_string = (char *)malloc(sizeof(char) * 2);
+    if (!summ_string) {
+        return NULL;
+    }
     summ_string[0] = '0';
     summ_string[1] = '\0';
     char * tmp = NULL;
@@ -80,6 +90,10 @@ char * in_base_summ(const int base, int quantity, ...) {
         }
         tmp = summ_string;
         summ_string = summ(summ_string, new_string, _strlen(summ_string), _strlen(new_string), base);
+        if (!summ_string) {
+            va_end(number);
+            return NULL;
+        }
         free(tmp);
         tmp = NULL;
     }
