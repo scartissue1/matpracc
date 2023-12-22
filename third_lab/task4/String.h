@@ -64,20 +64,12 @@ status_codes compare_string(int * result, const String * str1, const String * st
 status_codes copy_string(String ** destination, const String * source) {
     if (!source || !source->string) return INVALID_PARAMETER;
     if (free_string(destination) == INVALID_PARAMETER) return INVALID_PARAMETER;
-    switch (init_string(destination, source->string)) {
-        case OK: return OK;
-        case NO_MEMORY: return NO_MEMORY;
-        case INVALID_PARAMETER: return INVALID_PARAMETER;
-    }
+    return init_string(destination, source->string);
 }
 
 status_codes copy_string_new(String ** destination, const String * source) {
     if (*destination || !source || !source->string) return INVALID_PARAMETER;
-    switch (init_string(destination, source->string)) {
-        case OK: return OK;
-        case NO_MEMORY: return NO_MEMORY;
-        case INVALID_PARAMETER: return INVALID_PARAMETER;
-    }
+    return init_string(destination, source->string);
 }
 
 status_codes concat_strings(String ** str1, String * str2) {
