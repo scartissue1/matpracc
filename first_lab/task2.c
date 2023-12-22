@@ -61,22 +61,6 @@ int factorial (int number) {
     else return -1;
 }
 
-double my_pow_double (const double base, const int power) {
-    double result = base;
-    for (int i = 0; i < power; i++) {
-        result *= base;
-    }
-    return result;
-}
-
-int my_pow_int (const int base, const int power) {
-    int result = base;
-    for (int i = 0; i < power; i++) {
-        result *= base;
-    }
-    return result;
-}
-
 double euler_limit (double eps) {
     double n_arg = 1.0;
     double prev = 0.0;
