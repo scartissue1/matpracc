@@ -16,6 +16,9 @@ char * to_roman(int number) {
     char roman_letters[13][2] = {"I", "IV", "V", "IX", "X", "XL", "L", "XC", "C", "CD", "D", "CM", "M"};
     size_t in_roman_size = 0, in_roman_capacity = 2;
     char * in_roman = (char *)malloc(sizeof(char) * in_roman_capacity);
+    if (!in_roman) {
+        return NULL;
+    }
     if (number < 0) {
         number = abs(number);
         in_roman[0] = '-';
@@ -157,7 +160,6 @@ int overfprintf(FILE * stream, char * format, ...) {
                 char * tmp = (char *)realloc(flag, sizeof(char) * flag_capacity);
                 if (!tmp) {
                     free(flag);
-                    printf("No memory\n");
                     return -1;
                 }
                 flag = tmp;
@@ -166,6 +168,10 @@ int overfprintf(FILE * stream, char * format, ...) {
         flag[flag_size] = '\0';
         if (strcmp(flag, "%Ro\0") == 0) {
             char * result = to_roman(va_arg(args, int));
+            if (!result) {
+                free(flag);
+                return -1;
+            }
             accum += fprintf(stream, "%s", result);
             free(result);
         }
@@ -199,6 +205,10 @@ int overfprintf(FILE * stream, char * format, ...) {
             char * converted = NULL;
             if (strcmp(flag, "%Cv\0") == 0) converted = from_decimal_to_base(to_convert, base, 0);
             else converted = from_decimal_to_base(to_convert, base, 1);
+            if (!converted) {
+                free(flag);
+                return -1;
+            }
             accum += fprintf(stream, "%s", converted);
             free(converted);
         }
@@ -303,7 +313,6 @@ int oversprintf(char * buf, char * format, ...) {
                 char * tmp = (char *)realloc(flag, sizeof(char) * flag_capacity);
                 if (!tmp) {
                     free(flag);
-                    printf("No memory\n");
                     return -1;
                 }
                 flag = tmp;
@@ -312,6 +321,10 @@ int oversprintf(char * buf, char * format, ...) {
         flag[flag_size] = '\0';
         if (strcmp(flag, "%Ro\0") == 0) {
             char * result = to_roman(va_arg(args, int));
+            if (!result) {
+                free(flag);
+                return -1;
+            }
             accum += sprintf(buf + accum, "%s", result);
             free(result);
         }
@@ -345,6 +358,10 @@ int oversprintf(char * buf, char * format, ...) {
             char * converted = NULL;
             if (strcmp(flag, "%Cv\0") == 0) converted = from_decimal_to_base(to_convert, base, 0);
             else converted = from_decimal_to_base(to_convert, base, 1);
+            if (!converted) {
+                free(flag);
+                return -1;
+            }
             accum += sprintf(buf + accum, "%s", converted);
             free(converted);
         }

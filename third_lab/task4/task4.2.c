@@ -92,9 +92,15 @@ status_codes init_post(Post ** _post, Adress * _adress, size_t * size, size_t * 
     (*size) = 0;
     (*capacity) = 2;
     (*_post) = (Post *)malloc(sizeof(Post));
+    if (!*_post) {
+        return NO_MEMORY;
+    }
     (*_post)->adress = _adress;
     (*_post)->mails = (Mail *)malloc(sizeof(Mail) * (*capacity));
-    if (!(*_post)->mails) return NO_MEMORY;
+    if (!(*_post)->mails) {
+        free(*_post);
+        return NO_MEMORY;
+    }
     return OK;
 }
 
@@ -447,16 +453,21 @@ void print_mails(Post *_post, size_t size) {
     }
 }
 
+void free_adress(Adress *adress) {
+    free_string(&adress->city);
+    free_string(&adress->street);
+    free_string(&adress->building);
+    free_string(&adress->index);
+}
+
 void free_post(Post ** _post, size_t size) {
     for (int i = 0; i < size; i++) {
-        free_string(&(*_post)->mails[i].adress.city);
-        free_string(&(*_post)->mails[i].adress.street);
-        free_string(&(*_post)->mails[i].adress.building);
-        free_string(&(*_post)->mails[i].adress.index);
+        free_adress(&(*_post)->mails[i].adress);
         free_string(&(*_post)->mails[i].mail_id);
         free_string(&(*_post)->mails[i].creation);
         free_string(&(*_post)->mails[i].delivery);
     }
+    free_adress((*_post)->adress);
     free((*_post)->mails);
     free(*_post);
 }

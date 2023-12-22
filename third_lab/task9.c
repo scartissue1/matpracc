@@ -96,9 +96,10 @@ void find_word_count(Node * ptr, int * result, const char * word, int found_flag
         found_flag = 1;
         return;
     }
-    if (!found_flag)
+    if (!found_flag) {
         find_word_count(ptr->left, result, word, found_flag);
         find_word_count(ptr->right, result, word, found_flag);
+    }
 
 }
 

@@ -127,17 +127,6 @@ status_codes copy_stopList(stopList ** dest, stopList * src, int iter) {
     return OK;
 }
 
-status_codes copy_pathList(pathList ** dest, pathList * src) {
-    if (!src) {
-        return OK;
-    }
-    if (copy_stopList(&(*dest)->value, src->value, 0) == NO_MEMORY) {
-        return NO_MEMORY;
-    }
-    copy_pathList(dest, src->next);
-    return OK;
-}
-
 status_codes create_pathList(pathList ** head, Stop _stop) {
     pathList * tmp = (pathList *)malloc(sizeof(pathList));
     if (!tmp) return NO_MEMORY;
@@ -152,20 +141,14 @@ status_codes create_pathList(pathList ** head, Stop _stop) {
 
 
 status_codes insert_pathList(pathList * head, Stop _stop) {
-    while (1) {
+    while (head) {
         if (strcmp(head->value->value.transport_id, _stop.transport_id) == 0) {
             if (time_compare(head->value->value.arrive, _stop.arrive) > 0) {
                 return create_stopList(&(head->value), _stop);
             }
             return insert_stopList(head->value, _stop);
         }
-        if (!head->next) {
-            break;
-        }
         head = head->next;
-    }
-    if (strcmp(head->value->value.transport_id, _stop.transport_id) == 0) {
-        return insert_stopList(head->value, _stop);
     }
     pathList * tmp = (pathList *)malloc(sizeof(pathList));
     if (!tmp) {

@@ -66,7 +66,6 @@ int overfscanf(FILE * stream, const char * format, ...) {
                 char * tmp = (char *)realloc(flag, sizeof(char) * flag_capacity);
                 if (!tmp) {
                     free(flag);
-                    //printf("No memory\n");
                     return -1;
                 }
                 flag = tmp;

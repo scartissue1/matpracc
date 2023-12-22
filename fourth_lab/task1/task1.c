@@ -108,12 +108,7 @@ status_codes changeFile(const char *filename) {
         if (symbol == ' ' || symbol == '\t' || symbol == '\n') {
             word[word_size] = '\0';
             if (strcmp(word, "#define") == 0 && define_flag == 0) {
-                if (!define_flag) {
-                    define_flag = 1;
-                }
-                else {
-                    return INVALID_PARAMETER;
-                }
+                define_flag = 1;
                 fprintf(tmp, "%s", word);
                 fputc(symbol, tmp);
             }

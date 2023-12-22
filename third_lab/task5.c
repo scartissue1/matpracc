@@ -137,6 +137,8 @@ status_codes communicate(FILE * file, Student * database, size_t size, double ov
                     fprintf(file, "\n");
                 }
                 fprintf(file, "\n");
+                free(result);
+                result = NULL;
             }
             
         }
@@ -147,9 +149,18 @@ status_codes communicate(FILE * file, Student * database, size_t size, double ov
                 qsort(database, size, sizeof(database[0]), id_comp);
                 sort_flag = 1;
             }
-            else if (strcmp(flag, "surname") == 0) qsort(database, size, sizeof(database[0]), surname_comp);
-            else if (strcmp(flag, "name") == 0) qsort(database, size, sizeof(database[0]), name_comp);
-            else if (strcmp(flag, "grop") == 0) qsort(database, size, sizeof(database[0]), group_comp);
+            else {
+                if (strcmp(flag, "surname") == 0) {
+                    qsort(database, size, sizeof(database[0]), surname_comp);
+                }
+                else if (strcmp(flag, "name") == 0) {
+                    qsort(database, size, sizeof(database[0]), name_comp);
+                }
+                else if (strcmp(flag, "grop") == 0) {
+                    qsort(database, size, sizeof(database[0]), group_comp);
+                }
+                sort_flag = 0;
+            }
         }
         else if (strcmp(command, "get_stat") == 0) {
             int to_find;
